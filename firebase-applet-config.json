@@ -1,0 +1,10 @@
+{
+  "projectId": "personalassistantdiscord",
+  "appId": "1:652783157303:web:c48e87ed0e899eec10bfb2",
+  "apiKey": "AIzaSyBRaHDlLxWdY7WkUZH4VUopyXOx5Jj83R0",
+  "authDomain": "personalassistantdiscord.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-65d8c93c-851d-4c55-9faf-e06b7bc8ff97",
+  "storageBucket": "personalassistantdiscord.firebasestorage.app",
+  "messagingSenderId": "652783157303",
+  "measurementId": ""
+}

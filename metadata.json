@@ -1,0 +1,6 @@
+{
+  "name": "Twin Focus Health Tracker",
+  "description": "Optimized health and habit tracking app based on Sam Ovens style daily inputs and outputs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

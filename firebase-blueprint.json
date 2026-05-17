@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "HealthLog": {
+      "title": "Health Log",
+      "description": "Daily health and habit tracking data",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date", "description": "Date of the log" },
+        "userId": { "type": "string", "description": "User ID of the owner" },
+        "weight": { "type": "number", "description": "Morning weight (optional)" },
+        "sleepQuality": { "type": "integer", "description": "Sleep Quality (1-10)" },
+        "wakeups": { "type": "integer", "description": "Number of wake-ups" },
+        "energyCrashes": { "type": "integer", "description": "Energy Crashes (0=none, 1=mild, 2=mod, 3=severe)" },
+        "chairStandEase": { "type": "integer", "description": "Chair Stand Ease (1-10)" },
+        "gymCompleted": { "type": "boolean", "description": "Gym Session Completed" },
+        "fastedGymEnergy": { "type": "integer", "description": "Fasted Gym Energy (1-10)" },
+        "eatingWindowAdherence": { "type": "boolean", "description": "Eating Window Adherence" },
+        "eggMeal": { "type": "boolean", "description": "9:30 AM Eggs Meal (80% full)" },
+        "lunchProtein": { "type": "boolean", "description": "Lunch Protein-First + Walk" },
+        "dinnerTime": { "type": "boolean", "description": "Dinner by 7:30 PM" },
+        "postMealWalks": { "type": "integer", "description": "Post-Meal Walks Completed" },
+        "dailyProtein": { "type": "number", "description": "Daily Protein Estimate (g)" },
+        "hydration": { "type": "integer", "description": "Hydration (glasses / 8+)" },
+        "mobility": { "type": "boolean", "description": "Mobility / Sit-to-Stands" },
+        "notes": { "type": "string", "description": "Daily Notes" }
+      },
+      "required": ["date", "userId"]
+    },
+    "UserProfile": {
+        "title": "User Profile",
+        "description": "Basic user data",
+        "type": "object",
+        "properties": {
+            "displayName": { "type": "string" },
+            "email": { "type": "string" },
+            "photoURL": { "type": "string" }
+        },
+        "required": ["email"]
+    }
+  },
+  "firestore": {
+    "/healthLogs/{logId}": {
+      "schema": "HealthLog",
+      "description": "Collection of daily health logs"
+    },
+    "/users/{userId}": {
+        "schema": "UserProfile",
+        "description": "User profiles"
+    }
+  }
+}
