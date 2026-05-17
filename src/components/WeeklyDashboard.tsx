@@ -39,7 +39,7 @@ export default function WeeklyDashboard({ user }: { user: any }) {
     if (!user) return;
 
     if (user.isMock) {
-      const storageKey = `twin_focus_logs_${user.uid}`;
+      const storageKey = `twin_focus_logs_v2_${user.uid}`;
       const loadLogs = () => {
         const savedLogs = localStorage.getItem(storageKey);
         if (savedLogs) {
@@ -63,7 +63,7 @@ export default function WeeklyDashboard({ user }: { user: any }) {
             return {
               date: format(day, 'yyyy-MM-dd'),
               userId: user.uid,
-              weight: Number((isThursday ? 84.1 : 83.5 + (i * -0.08) + Math.random() * 0.2).toFixed(1)),
+              weight: Number((isThursday ? 185.4 : 184.1 + (i * -0.15) + Math.random() * 0.4).toFixed(1)),
               sleepQuality: isThursday ? 6 : isWeekend ? 9 : 8,
               wakeups: isThursday ? 3 : 1,
               energyCrashes: isThursday ? 2 : 0,

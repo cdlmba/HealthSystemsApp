@@ -43,7 +43,7 @@ export default function SystemsCoach({ user }: { user: any }) {
     if (!user) return;
 
     if (user.isMock) {
-      const storageKey = `twin_focus_logs_${user.uid}`;
+      const storageKey = `twin_focus_logs_v2_${user.uid}`;
       const loadLogs = () => {
         const savedLogs = localStorage.getItem(storageKey);
         if (savedLogs) {

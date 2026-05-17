@@ -20,7 +20,7 @@ const METRIC_GROUPS = [
   {
     category: 'Health Focus',
     metrics: [
-      { id: 'weight', label: 'Morning Weight (kg)', type: 'number', aggregation: 'avg', target: 'Maintain / Monitor' },
+      { id: 'weight', label: 'Morning Weight (lbs)', type: 'number', aggregation: 'avg', target: 'Maintain / Monitor' },
       { id: 'sleepQuality', label: 'Sleep Quality (1-10)', type: 'number', aggregation: 'avg', target: '8+' },
       { id: 'wakeups', label: '# of Wake-ups', type: 'number', aggregation: 'avg', target: '< 2' },
       { id: 'energyCrashes', label: 'Energy Crashes (0-3)', type: 'number', aggregation: 'avg', target: '0' },
@@ -70,7 +70,7 @@ const generateSeedLogs = (userId: string, weekStart: Date): HealthLog[] => {
     return {
       date: dateStr,
       userId,
-      weight: Number((isThursday ? 84.1 : 83.5 + (i * -0.08) + Math.random() * 0.2).toFixed(1)),
+      weight: Number((isThursday ? 185.4 : 184.1 + (i * -0.15) + Math.random() * 0.4).toFixed(1)),
       sleepQuality: isThursday ? 6 : isWeekend ? 9 : 8,
       wakeups: isThursday ? 3 : 1,
       energyCrashes: isThursday ? 2 : 0,
@@ -105,7 +105,7 @@ export default function HealthTrackingTable({ user }: { user: any }) {
     if (!user) return;
 
     if (user.isMock) {
-      const storageKey = `twin_focus_logs_${user.uid}`;
+      const storageKey = `twin_focus_logs_v2_${user.uid}`;
       const savedLogs = localStorage.getItem(storageKey);
       if (savedLogs) {
         setLogs(JSON.parse(savedLogs));
@@ -150,7 +150,7 @@ export default function HealthTrackingTable({ user }: { user: any }) {
     };
 
     if (user.isMock) {
-      const storageKey = `twin_focus_logs_${user.uid}`;
+      const storageKey = `twin_focus_logs_v2_${user.uid}`;
       const savedLogs = localStorage.getItem(storageKey);
       let updatedLogsList: HealthLog[] = savedLogs ? JSON.parse(savedLogs) : [];
       
