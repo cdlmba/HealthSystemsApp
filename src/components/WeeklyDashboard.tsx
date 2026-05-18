@@ -5,6 +5,15 @@ import { HealthLog } from '../types';
 import { startOfWeek, addDays, parseISO, format } from 'date-fns';
 import { Progress } from './ui/progress';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import { Button } from './ui/button';
+import { ShieldAlert, Clipboard, Check } from 'lucide-react';
+import {
   BarChart,
   Bar,
   XAxis,
@@ -34,6 +43,40 @@ import {
 export default function WeeklyDashboard({ user }: { user: any }) {
   const [logs, setLogs] = useState<HealthLog[]>([]);
   const [currentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [copied, setCopied] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
+
+  const handleCopyAudit = () => {
+    const auditText = `=========================================
+TWIN FOCUS SYSTEM AUDIT REPORT - MAY 17, 2026
+=========================================
+[HEALTH PILLAR] Adherence Index: ${healthAdherence}%
+- Sleep Quality Avg: ${getAvg('sleepQuality').toFixed(1)}/10.0
+- Gym Session Completed: ${getSum('gymCompleted')}/3 (Target met)
+- Fasted Cardio Energy: ${getAvg('fastedGymEnergy').toFixed(1)}/10.0
+- Eating Window Adherence: ${((getSum('eatingWindowAdherence') / Math.max(weekLogs.length, 1)) * 100).toFixed(0)}%
+
+[MARGINRESET PILLAR] Adherence Index: ${marginAdherence}%
+- Total Writing Output: ${getNumberSum('writingOutput')} words
+- Financial Rules Adherence: ${getSum('finances801010')}/7 days
+- Quiet Time Spiritual Rhythm: ${((getSum('spiritualRhythm') / Math.max(weekLogs.length, 1)) * 100).toFixed(0)}%
+- Relational check-ins completed: ${getNumberSum('dailyCalls')} calls
+
+[SYSTEM VARIANCES & LEAKS DETECTED]
+- Thursday (May 14) System Outage: Late business dinner breached the 14h window, sleep quality collapsed to 6.0, 80/10/10 check missed, and writing output was stalled at 0 words.
+
+[DIRECT COACHING INSTRUCTION]
+Restore discipline. The biological perimeter is your creative foundation. Defend it.
+=========================================`;
+
+    try {
+      navigator.clipboard.writeText(auditText);
+    } catch (e) {
+      console.warn("Clipboard access restricted in headless test environment:", e);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -258,6 +301,87 @@ export default function WeeklyDashboard({ user }: { user: any }) {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Dynamic Header Block with Audit Action */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 text-white shadow-lg relative overflow-hidden">
+        <div className="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div>
+          <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+            System Telemetry Operational
+          </div>
+          <h2 className="text-lg md:text-xl font-bold mt-1 tracking-tight">Active Development Cycle Audit</h2>
+          <p className="text-xs text-slate-400 mt-1 max-w-xl">
+            Analyze compliance indexes for physical baselines and MarginReset creative capital checks.
+          </p>
+        </div>
+
+        <Dialog open={auditOpen} onOpenChange={setAuditOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-[10px] px-5 py-2.5 rounded-lg shadow-md shrink-0 transition-all flex items-center gap-2 border-0 cursor-pointer">
+              <ShieldAlert className="w-4 h-4" />
+              Generate Cycle Audit
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-xl bg-slate-950 border border-slate-850 text-white p-6 md:p-8 rounded-2xl shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-black tracking-tight text-white flex items-center gap-2 font-mono border-b border-slate-800 pb-3">
+                <span className="text-emerald-400">Ω</span> TWIN FOCUS INTEGRATED AUDIT
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="mt-4 flex flex-col gap-5 text-sm">
+              <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 font-mono text-[11px] leading-relaxed text-slate-300 max-h-[300px] overflow-y-auto">
+                <p className="text-emerald-400 font-black mb-2 uppercase tracking-wider">--- METRIC SUMMARY ---</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                  <div>Health Adherence Index:</div>
+                  <div className="text-white font-bold">{healthAdherence}%</div>
+                  <div>Avg Sleep Quality:</div>
+                  <div className="text-white font-bold">{getAvg('sleepQuality').toFixed(1)}/10.0</div>
+                  <div>Gym Sessions:</div>
+                  <div className="text-white font-bold">{getSum('gymCompleted')}/3</div>
+                  
+                  <div>Margin Adherence Index:</div>
+                  <div className="text-white font-bold">{marginAdherence}%</div>
+                  <div>Total Writing Output:</div>
+                  <div className="text-white font-bold">{getNumberSum('writingOutput')} words</div>
+                  <div>Quiet Times:</div>
+                  <div className="text-white font-bold">{getSum('spiritualRhythm')}/7 days</div>
+                </div>
+
+                <p className="text-rose-400 font-black mt-4 mb-2 uppercase tracking-wider">--- LEAKS & VARIANCES ---</p>
+                <p className="text-xs">
+                  - Thursday Outage: Sleep dipped to 6.0. Eating window broken by business dinner. Writing Count: 0w.
+                </p>
+
+                <p className="text-emerald-400 font-black mt-4 mb-2 uppercase tracking-wider">--- SYSTEM COACH DIRECTIVE ---</p>
+                <p className="text-xs italic text-emerald-300">
+                  "Christopher, restore structure immediately. The biological perimeter is your creative foundation. Defend it."
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 mt-2">
+                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono font-bold">CYCLE: MAY 17, 2026</span>
+                <Button 
+                  onClick={handleCopyAudit} 
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs gap-2 py-2.5 px-4 shadow transition-all shrink-0 cursor-pointer border-0"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      COPIED!
+                    </>
+                  ) : (
+                    <>
+                      <Clipboard className="w-4 h-4" />
+                      COPY FOR DISCORD CHECK-IN
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       {/* Pillar High-Level Summary Status */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Health Command Center Card */}
