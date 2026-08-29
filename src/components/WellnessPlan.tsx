@@ -289,15 +289,17 @@ export default function WellnessPlan({ user }: { user: any }) {
             { key: 'targetFat', label: 'Fat Target', unit: 'g / day', color: 'amber' },
             { key: 'targetNetCarbs', label: 'Net Carbs Target', unit: 'g / day', color: 'emerald' },
           ].map(({ key, label, unit, color }) => (
-            <Field key={key} label={label} hint={unit}>
-              <input
-                type="number"
-                min={0}
-                value={(plan as any)[key]}
-                onChange={e => setField(key as any, Number(e.target.value))}
-                className={`h-10 px-3 text-sm border rounded-lg focus:outline-none focus:ring-2 transition font-bold text-center border-slate-200 focus:ring-${color}-400/30 focus:border-${color}-400`}
-              />
-            </Field>
+            <div key={key}>
+              <Field label={label} hint={unit}>
+                <input
+                  type="number"
+                  min={0}
+                  value={(plan as any)[key]}
+                  onChange={e => setField(key as any, Number(e.target.value))}
+                  className={`h-10 px-3 text-sm border rounded-lg focus:outline-none focus:ring-2 transition font-bold text-center border-slate-200 focus:ring-${color}-400/30 focus:border-${color}-400`}
+                />
+              </Field>
+            </div>
           ))}
         </div>
       </Section>
