@@ -2,23 +2,9 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Bodoni Moda", serif;
 }
 
-@layer base {
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased;
-  }
-}
-
-@layer components {
-  .geometric-card {
-    @apply bg-white border border-slate-200 shadow-sm rounded-lg overflow-hidden;
-  }
-  
-  .grid-header {
-    @apply bg-emerald-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-emerald-800;
-  }
-}
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
@@ -26,8 +12,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-heading: 'Bodoni Moda', Georgia, serif;
+    --font-sans: 'Inter', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -68,39 +54,56 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ── Wellness Stewardship Design System ─────────────────────────────────── */
+/* Palette: Cream / Deep Forest Green / Rich Gold                             */
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400;1,6..96,500&display=swap');
+
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    /* Core brand palette */
+    --tsd-cream:        #F8F4EF;
+    --tsd-surface:      #FDF9F4;
+    --tsd-surface-dim:  #EDE9E3;
+    --tsd-forest:       #013220;
+    --tsd-forest-mid:   #234f3b;
+    --tsd-moss:         #717973;
+    --tsd-gold:         #D4A017;
+    --tsd-gold-light:   #F6BE39;
+    --tsd-gold-bg:      #FFF9E6;
+
+    /* Override shadcn/ui tokens with TSD palette */
+    --background:       #F8F4EF;
+    --foreground:       #013220;
+    --card:             #FFFFFF;
+    --card-foreground:  #013220;
+    --popover:          #FFFFFF;
+    --popover-foreground: #013220;
+    --primary:          #013220;
+    --primary-foreground: #FFFFFF;
+    --secondary:        #FFF9E6;
+    --secondary-foreground: #795900;
+    --muted:            #EDE9E3;
+    --muted-foreground: #717973;
+    --accent:           #FFF9E6;
+    --accent-foreground: #795900;
+    --destructive:      oklch(0.577 0.245 27.325);
+    --border:           #DDD9D5;
+    --input:           #DDD9D5;
+    --ring:             #D4A017;
+    --chart-1:          #D4A017;
+    --chart-2:          #013220;
+    --chart-3:          #234f3b;
+    --chart-4:          #F6BE39;
+    --chart-5:          #717973;
+    --radius:           0.75rem;
+    --sidebar:          #FDF9F4;
+    --sidebar-foreground: #013220;
+    --sidebar-primary:  #013220;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent:   #FFF9E6;
+    --sidebar-accent-foreground: #795900;
+    --sidebar-border:   #DDD9D5;
+    --sidebar-ring:     #D4A017;
 }
 
 .dark {
@@ -147,4 +150,100 @@
   html {
     @apply font-sans;
     }
+}
+
+/* ── TSD Utility Classes ──────────────────────────────────────────────────── */
+
+/* Card: soft cream surface, ambient green shadow, 12px radius */
+.tsd-card {
+  background: #FFFFFF;
+  border: 1px solid var(--tsd-surface-dim);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(1, 50, 32, 0.06);
+  overflow: hidden;
+}
+
+/* Section header inside a card */
+.tsd-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--tsd-surface-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* Gold accent bar on the left edge of a card */
+.tsd-card-accent {
+  border-left: 3px solid var(--tsd-gold);
+}
+
+/* Serif headline utility */
+.tsd-serif {
+  font-family: 'Bodoni Moda', Georgia, serif;
+}
+
+/* Gold badge / pill */
+.tsd-badge-gold {
+  background: var(--tsd-gold-bg);
+  color: #795900;
+  border: 1px solid #F6BE39;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Forest-green badge / pill */
+.tsd-badge-forest {
+  background: rgba(1, 50, 32, 0.08);
+  color: var(--tsd-forest);
+  border: 1px solid rgba(1, 50, 32, 0.15);
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Gold progress bar (used on KPI cards) */
+.tsd-progress-track {
+  background: var(--tsd-surface-dim);
+  border-radius: 9999px;
+  height: 6px;
+  overflow: hidden;
+}
+.tsd-progress-fill {
+  background: var(--tsd-gold);
+  border-radius: 9999px;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+/* Legacy geometric-card — now inherits TSD style */
+@layer components {
+  .geometric-card {
+    background: #FFFFFF;
+    border: 1px solid #DDD9D5;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px 0 rgba(1, 50, 32, 0.06);
+  }
+  .grid-header {
+    background: rgba(1, 50, 32, 0.05);
+    border-bottom: 1px solid #DDD9D5;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #234f3b;
+  }
 }
