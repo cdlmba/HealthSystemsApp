@@ -10,15 +10,18 @@ import {
 import { Flame, Beef, Droplets, Wheat, TrendingUp, ChevronLeft, ChevronRight, UtensilsCrossed } from 'lucide-react';
 
 const TSD = {
-  forest:    '#013220',
-  forestMid: '#234f3b',
-  moss:      '#717973',
-  gold:      '#D4A017',
-  goldLight: '#F6BE39',
-  goldBg:    '#FFF9E6',
-  cream:     '#F8F4EF',
-  surface:   '#FDF9F4',
-  surfaceDim:'#EDE9E3',
+  forest:    'var(--tsd-forest)',
+  forestMid: 'var(--tsd-forest-mid)',
+  moss:      'var(--tsd-moss)',
+  gold:      'var(--tsd-gold)',
+  goldLight: 'var(--tsd-gold-light)',
+  goldBg:    'var(--tsd-gold-bg)',
+  cream:     'var(--tsd-bg)',
+  surface:   'var(--tsd-surface)',
+  surfaceDim:'var(--tsd-surface-dim)',
+  text:      'var(--tsd-text)',
+  textDim:   'var(--tsd-text-dim)',
+  danger:    'var(--tsd-danger)',
 };
 
 const MACRO_CONFIG = [
@@ -59,7 +62,7 @@ export default function NutritionDashboard({ user }: { user: any }) {
   useEffect(() => {
     if (!user) return;
     if (user.isMock) {
-      const raw = localStorage.getItem(`twin_focus_wellness_plan_${user.uid}`);
+      const raw = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
       if (raw) setPlan(JSON.parse(raw));
       return;
     }
@@ -76,7 +79,7 @@ export default function NutritionDashboard({ user }: { user: any }) {
   useEffect(() => {
     if (!user) return;
     if (user.isMock) {
-      const key = `twin_focus_food_logs_${user.uid}`;
+      const key = `dean_tracker_food_logs_${user.uid}`;
       const loadLogs = () => {
         const raw = localStorage.getItem(key);
         if (raw) {
@@ -132,52 +135,52 @@ export default function NutritionDashboard({ user }: { user: any }) {
   };
 
   const tooltipStyle = {
-    borderRadius: '10px',
+    borderRadius: '12px',
     border: `1px solid ${TSD.surfaceDim}`,
-    boxShadow: '0 4px 16px rgba(1,50,32,0.08)',
+    backgroundColor: 'var(--tsd-surface-2)',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
     fontSize: '12px',
-    color: TSD.forest,
+    color: 'var(--tsd-text)',
   };
 
   return (
     <div className="flex flex-col gap-6">
       {/* ── Header ─────────────────────────────────────────────── */}
       <div
-        className="rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden"
-        style={{ background: TSD.forest }}
+        className="rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden"
+        style={{ background: 'var(--tsd-forest-mid)' }}
       >
-        {/* Gold glow orb */}
         <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full blur-3xl pointer-events-none"
-          style={{ background: `${TSD.gold}18` }} />
+          style={{ background: 'rgba(246,201,14,0.15)' }} />
 
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-1">
-            <UtensilsCrossed className="w-3 h-3" style={{ color: TSD.goldLight }} />
-            <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: TSD.goldLight }}>
+            <UtensilsCrossed className="w-4 h-4" style={{ color: TSD.gold }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: TSD.gold }}>
               Nutrition Analytics
             </span>
           </div>
-          <h2 className="tsd-serif text-xl font-semibold text-white">Macro Performance</h2>
-          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            Weekly breakdown vs. your Wellness Plan targets
+          <h2 className="tsd-serif text-2xl font-bold text-[#0e1412]">Macro Performance</h2>
+          <p className="text-xs font-medium mt-1" style={{ color: 'rgba(14,20,18,0.7)' }}>
+            Weekly breakdown vs targets
           </p>
         </div>
 
         {/* Week nav */}
-        <div className="flex items-center gap-3 relative z-10 shrink-0">
+        <div className="flex items-center gap-3 relative z-10 shrink-0 bg-[#0e1412] p-1 rounded-xl">
           <button
             onClick={() => setWeekOffset(v => v - 1)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-            style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[rgba(255,255,255,0.1)]"
+            style={{ color: 'rgba(255,255,255,0.7)' }}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-xs font-medium min-w-[160px] text-center text-white">{weekLabel}</span>
+          <span className="text-xs font-bold min-w-[130px] text-center text-white">{weekLabel}</span>
           <button
             onClick={() => setWeekOffset(v => Math.min(v + 1, 0))}
             disabled={weekOffset === 0}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30"
-            style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-[rgba(255,255,255,0.1)]"
+            style={{ color: 'rgba(255,255,255,0.7)' }}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -185,7 +188,7 @@ export default function NutritionDashboard({ user }: { user: any }) {
       </div>
 
       {/* ── KPI Cards ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {MACRO_CONFIG.map(({ key, label, unit, color, targetKey, icon: Icon }) => {
           const avg    = getAvg(key as any);
           const target = (plan as any)[targetKey] as number | undefined;
@@ -194,38 +197,33 @@ export default function NutritionDashboard({ user }: { user: any }) {
           const variance = target && avg ? Math.round(((avg - target) / target) * 100) : null;
 
           return (
-            <div key={key} className="tsd-card p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+            <div key={key} className="metric-card">
               {/* Label + icon */}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: TSD.moss }}>
+                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: TSD.textDim }}>
                   {label}
                 </span>
-                <div className="p-1.5 rounded-lg" style={{ background: `${color}18` }}>
-                  <Icon className="h-3.5 w-3.5" style={{ color }} />
+                <div className="p-1.5 rounded-lg border border-[var(--tsd-surface-dim)]" style={{ background: 'var(--tsd-bg)' }}>
+                  <Icon className="h-4 w-4" style={{ color }} />
                 </div>
               </div>
 
               {/* Value */}
-              <div>
+              <div className="mt-1">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="tsd-serif text-3xl font-semibold" style={{ color: TSD.forest }}>
+                  <span className="tsd-serif text-3xl font-bold" style={{ color: TSD.text }}>
                     {avg || '—'}
                   </span>
-                  <span className="text-xs font-medium" style={{ color: TSD.moss }}>{unit} avg</span>
+                  <span className="text-[10px] font-bold uppercase" style={{ color: TSD.textDim }}>{unit}</span>
                 </div>
                 {target && (
-                  <div className="text-[10px] mt-1 flex items-center gap-1.5" style={{ color: TSD.moss }}>
-                    Target:
-                    <span className="font-semibold" style={{ color: TSD.forest }}>
+                  <div className="text-[9px] mt-1 flex flex-wrap items-center gap-1.5 font-bold uppercase tracking-widest" style={{ color: TSD.textDim }}>
+                    Tgt:
+                    <span style={{ color: TSD.text }}>
                       {target} {unit}
                     </span>
                     {variance !== null && (
-                      <span
-                        className="tsd-badge-gold"
-                        style={variance < 0
-                          ? { background: 'rgba(1,50,32,0.07)', borderColor: 'rgba(1,50,32,0.2)', color: TSD.forestMid }
-                          : {}}
-                      >
+                      <span className="bg-[var(--tsd-surface-dim)] px-1 py-0.5 rounded text-[var(--tsd-text)]">
                         {variance > 0 ? '+' : ''}{variance}%
                       </span>
                     )}
@@ -235,22 +233,11 @@ export default function NutritionDashboard({ user }: { user: any }) {
 
               {/* Gold progress bar */}
               {pct !== null && (
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[9px] font-semibold uppercase tracking-widest" style={{ color: TSD.moss }}>
-                    <span>Adherence</span>
-                    <span style={{ color: TSD.gold }}>{Math.min(pct, 100)}%</span>
-                  </div>
+                <div className="space-y-1 mt-2">
                   <div className="tsd-progress-track">
-                    <div className="tsd-progress-fill" style={{ width: `${Math.min(pct, 100)}%` }} />
+                    <div className="tsd-progress-fill" style={{ width: `${Math.min(pct, 100)}%`, background: color }} />
                   </div>
                 </div>
-              )}
-
-              {/* Days on target */}
-              {onTarget && (
-                <p className="text-[10px] font-medium pt-2" style={{ borderTop: `1px solid ${TSD.surfaceDim}`, color: TSD.moss }}>
-                  On target: <strong style={{ color: TSD.forest }}>{onTarget.days}/{onTarget.total}</strong> days
-                </p>
               )}
             </div>
           );
@@ -260,29 +247,28 @@ export default function NutritionDashboard({ user }: { user: any }) {
       {/* ── Charts row ─────────────────────────────────────────── */}
       <div className="grid lg:grid-cols-2 gap-4">
         {/* Calorie bar chart */}
-        <div className="tsd-card p-6 flex flex-col gap-3">
-          <div className="flex items-center gap-2">
+        <div className="metric-card">
+          <div className="flex items-center gap-2 mb-4">
             <Flame className="w-4 h-4" style={{ color: TSD.gold }} />
-            <h3 className="tsd-serif text-base font-semibold" style={{ color: TSD.forest }}>
-              Daily Calories vs. Target
+            <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: TSD.textDim }}>
+              Daily Calories
             </h3>
           </div>
-          <div className="h-56 w-full">
+          <div className="h-56 w-full -ml-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={TSD.surfaceDim} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false}
-                  tick={{ fontSize: 10, fill: TSD.moss, fontWeight: 600 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: TSD.moss }} />
-                <Tooltip cursor={{ fill: `${TSD.gold}08` }} contentStyle={tooltipStyle} />
-                <Bar name="Calories" dataKey="Calories" fill={TSD.gold} radius={[6, 6, 0, 0]} barSize={26} />
+                  tick={{ fontSize: 10, fill: TSD.textDim, fontWeight: 600 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: TSD.textDim }} width={40} />
+                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={tooltipStyle} />
+                <Bar name="Calories" dataKey="Calories" fill={TSD.gold} radius={[4, 4, 0, 0]} barSize={20} />
                 {plan.targetCalories && (
                   <ReferenceLine
                     y={plan.targetCalories}
                     stroke={TSD.goldLight}
-                    strokeDasharray="5 4"
-                    strokeWidth={1.5}
-                    label={{ value: `Target ${plan.targetCalories}`, fill: TSD.gold, fontSize: 10, position: 'right' }}
+                    strokeDasharray="4 4"
+                    strokeWidth={2}
                   />
                 )}
               </BarChart>
@@ -291,26 +277,26 @@ export default function NutritionDashboard({ user }: { user: any }) {
         </div>
 
         {/* Macro trend chart */}
-        <div className="tsd-card p-6 flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" style={{ color: TSD.forestMid }} />
-            <h3 className="tsd-serif text-base font-semibold" style={{ color: TSD.forest }}>
-              Protein / Fat / Net Carbs — Trend
+        <div className="metric-card">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4" style={{ color: TSD.forest }} />
+            <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: TSD.textDim }}>
+              Macro Trend
             </h3>
           </div>
-          <div className="h-56 w-full">
+          <div className="h-56 w-full -ml-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={TSD.surfaceDim} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false}
-                  tick={{ fontSize: 10, fill: TSD.moss, fontWeight: 600 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: TSD.moss }} />
+                  tick={{ fontSize: 10, fill: TSD.textDim, fontWeight: 600 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: TSD.textDim }} width={40} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Legend verticalAlign="top" align="right" iconType="circle"
-                  wrapperStyle={{ fontSize: '10px', fontWeight: 600, paddingBottom: '16px', color: TSD.moss }} />
-                <Line name="Protein (g)"   type="monotone" dataKey="Protein"   stroke={TSD.forest}    strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line name="Fat (g)"       type="monotone" dataKey="Fat"       stroke={TSD.gold}      strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line name="Net Carbs (g)" type="monotone" dataKey="Net Carbs" stroke={TSD.goldLight} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                  wrapperStyle={{ fontSize: '10px', fontWeight: 600, paddingBottom: '10px', color: TSD.textDim }} />
+                <Line name="Protein"   type="monotone" dataKey="Protein"   stroke={TSD.forest}    strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line name="Fat"       type="monotone" dataKey="Fat"       stroke={TSD.gold}      strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line name="Net Carbs" type="monotone" dataKey="Net Carbs" stroke={TSD.goldLight} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -318,11 +304,11 @@ export default function NutritionDashboard({ user }: { user: any }) {
       </div>
 
       {/* ── Day-by-Day Summary ─────────────────────────────────── */}
-      <div className="tsd-card p-6">
-        <h3 className="tsd-serif text-base font-semibold mb-5" style={{ color: TSD.forest }}>
-          Daily Meal Log Summary
+      <div className="metric-card mb-4">
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: TSD.textDim }}>
+          Daily Log Summary
         </h3>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="flex justify-between gap-1 overflow-x-auto pb-2">
           {Array.from({ length: 7 }).map((_, i) => {
             const day      = addDays(weekStart, i);
             const log      = weekLogs.find(l => l.date === format(day, 'yyyy-MM-dd'));
@@ -334,40 +320,26 @@ export default function NutritionDashboard({ user }: { user: any }) {
             const isEmpty  = cal === 0;
 
             return (
-              <div key={i} className="flex flex-col gap-1.5 items-center">
-                <span className="text-[10px] font-semibold uppercase" style={{ color: TSD.moss }}>
+              <div key={i} className="flex flex-col gap-1 items-center min-w-[45px]">
+                <span className="text-[9px] font-bold uppercase" style={{ color: TSD.textDim }}>
                   {format(day, 'EEE')}
                 </span>
-                <span className="text-[9px]" style={{ color: TSD.surfaceDim.replace('#','') === 'EDE9E3' ? TSD.moss : TSD.moss }}>
-                  {format(day, 'M/d')}
-                </span>
                 <div
-                  className="w-full rounded-xl p-2 text-center transition-colors"
+                  className="w-full rounded-lg py-2 flex flex-col items-center border"
                   style={{
-                    background: isEmpty ? TSD.surface :
-                                isOver  ? 'rgba(186,26,26,0.06)' :
-                                          'rgba(1,50,32,0.05)',
-                    border: `1px solid ${isEmpty ? TSD.surfaceDim :
-                                         isOver  ? 'rgba(186,26,26,0.15)' :
-                                                   'rgba(1,50,32,0.12)'}`,
+                    background: isEmpty ? 'var(--tsd-bg)' : isOver ? 'rgba(248,113,113,0.1)' : 'var(--tsd-surface)',
+                    borderColor: isEmpty ? 'var(--tsd-surface-dim)' : isOver ? 'rgba(248,113,113,0.3)' : 'var(--tsd-surface-dim)'
                   }}
                 >
-                  <div
-                    className="tsd-serif text-base font-semibold"
-                    style={{ color: isEmpty ? TSD.surfaceDim : isOver ? '#ba1a1a' : TSD.forest }}
-                  >
+                  <span className="text-[10px] font-bold" style={{ color: isOver ? 'var(--tsd-danger)' : 'var(--tsd-text)' }}>
                     {cal || '—'}
-                  </div>
-                  <div className="text-[9px] font-medium" style={{ color: TSD.moss }}>kcal</div>
-                  {mealCount > 0 && (
-                    <div className="text-[9px] mt-0.5" style={{ color: TSD.moss }}>{mealCount} items</div>
-                  )}
+                  </span>
                 </div>
                 {cal > 0 && (
                   <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: TSD.surfaceDim }}>
                     <div
                       className="h-full rounded-full transition-all"
-                      style={{ width: `${pct}%`, background: isOver ? '#ba1a1a' : TSD.gold }}
+                      style={{ width: `${pct}%`, background: isOver ? 'var(--tsd-danger)' : TSD.gold }}
                     />
                   </div>
                 )}

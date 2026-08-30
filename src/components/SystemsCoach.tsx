@@ -22,7 +22,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 // Systems Coach Persona Instruction
-const COACH_SYSTEM_INSTRUCTION = `You are a disciplined systems coach helping Christopher execute his Twin Focus vision (Health + MarginReset). You are direct, encouraging, and data-driven. Always reference his goals: 14/10 eating window, gym days, chair stand progress, writing output, 80/10/10 finances, spiritual rhythm, daily calls, etc. Keep your tone direct, punchy, tactical, and highly disciplined. Do not use corporate speak.`;
+const COACH_SYSTEM_INSTRUCTION = `You are a disciplined systems coach helping Christopher execute his Dean Tracker vision (Health + MarginReset). You are direct, encouraging, and data-driven. Always reference his goals: 14/10 eating window, gym days, chair stand progress, writing output, 80/10/10 finances, spiritual rhythm, daily calls, etc. Keep your tone direct, punchy, tactical, and highly disciplined. Do not use corporate speak.`;
 
 interface Message {
   role: 'user' | 'coach';
@@ -43,7 +43,7 @@ export default function SystemsCoach({ user }: { user: any }) {
     if (!user) return;
 
     if (user.isMock) {
-      const storageKey = `twin_focus_logs_v2_${user.uid}`;
+      const storageKey = `dean_tracker_logs_v2_${user.uid}`;
       const loadLogs = () => {
         const savedLogs = localStorage.getItem(storageKey);
         if (savedLogs) {
@@ -112,7 +112,7 @@ export default function SystemsCoach({ user }: { user: any }) {
       setMessages([
         {
           role: 'coach',
-          text: `Systems Coach active, Christopher. Twin Focus protocol: Health + MarginReset is loaded.\n\nI have compiled your performance telemetry. Gym sessions completed: ${gymDays}/3, Eating window adherence: ${eatingWindowCount}/7 days, Writing output: ${writingOutput} words, 80/10/10 financial alignment: ${financialDays}/7 check-ins. Daily relational calls: ${relationalCalls}.\n\nState your system variance or request a diagnostic below. Measure → Adjust → Improve. Let's go.`,
+          text: `Systems Coach active, Christopher. Dean Tracker protocol: Health + MarginReset is loaded.\n\nI have compiled your performance telemetry. Gym sessions completed: ${gymDays}/3, Eating window adherence: ${eatingWindowCount}/7 days, Writing output: ${writingOutput} words, 80/10/10 financial alignment: ${financialDays}/7 check-ins. Daily relational calls: ${relationalCalls}.\n\nState your system variance or request a diagnostic below. Measure → Adjust → Improve. Let's go.`,
           timestamp: new Date()
         }
       ]);
@@ -215,7 +215,7 @@ export default function SystemsCoach({ user }: { user: any }) {
 
 **Diagnostic**: ${
       eatingWindowCount >= 5 && gymDays >= 3 && writingOutput >= 2000
-        ? "Systems are in green status. The Twin Focus is stable. Double down on writing output and increase relational call cadence."
+        ? "Systems are in green status. The Dean Tracker is stable. Double down on writing output and increase relational call cadence."
         : "Operational variance detected. Review the system alerts. Tighten your eating windows, defend your quiet hour for writing, and execute the protocol with complete discipline."
     }
 
@@ -357,29 +357,29 @@ What specific protocol adjustments do you need help with?`;
       {/* Sidebar Command Console */}
       <div className="lg:col-span-1 flex flex-col gap-6">
         {/* Coach Header Emblem */}
-        <div className="geometric-card p-6 bg-slate-900 border-slate-800 text-white flex flex-col gap-4 relative overflow-hidden">
+        <div className="p-6 flex flex-col gap-4 relative overflow-hidden" style={{ background: 'var(--tsd-forest)', border: '1px solid var(--tsd-forest-mid)', borderRadius: '12px' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <span className="font-extrabold text-white text-lg">Ω</span>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <span className="font-extrabold text-emerald-400 text-xl font-mono">Ω</span>
             </div>
             <div>
               <h3 className="font-bold tracking-tight text-sm leading-tight text-white">SYSTEMS COACH</h3>
               <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mt-0.5">Online • Direct Diagnostics</p>
             </div>
           </div>
-          <p className="text-xs text-slate-400 italic border-l-2 border-emerald-500 pl-3 py-1 font-medium">
-            "Measure → Adjust → Improve. No-BS accountability for Christopher's Twin Focus."
+          <p className="text-xs italic border-l-2 border-emerald-500 pl-3 py-1 font-medium" style={{ color: 'rgba(248,244,239,0.65)' }}>
+            "Measure → Adjust → Improve. No-BS accountability for Christopher's Dean Tracker."
           </p>
         </div>
 
         {/* Real-time System Alerts */}
         <div className="geometric-card p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center justify-between border-b border-surface-dim pb-2">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
               <ShieldAlert className="w-3.5 h-3.5 text-slate-500" />
               Active System Variances
             </span>
-            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-surface-dim text-slate-600">
               {systemAlerts.length} Warnings
             </span>
           </div>
@@ -389,7 +389,7 @@ What specific protocol adjustments do you need help with?`;
               <div className="flex flex-col items-center justify-center py-6 text-center">
                 <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2 animate-bounce" />
                 <span className="text-xs font-bold text-emerald-700">Perfect Execution Mode</span>
-                <span className="text-[10px] text-slate-400 mt-1">Zero leaks detected in your Twin Focus.</span>
+                <span className="text-[10px] text-slate-400 mt-1">Zero leaks detected in your Dean Tracker.</span>
               </div>
             ) : (
               systemAlerts.map((alert, idx) => (
@@ -412,7 +412,7 @@ What specific protocol adjustments do you need help with?`;
 
         {/* Accountability Milestones */}
         <div className="geometric-card p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center justify-between border-b border-surface-dim pb-2">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
               <TrendingUp className="w-3.5 h-3.5 text-slate-500" />
               Target Checklist Metrics
@@ -423,44 +423,44 @@ What specific protocol adjustments do you need help with?`;
           <div className="flex flex-col gap-2.5">
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-slate-600">Eating Window (5+ days)</span>
-              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${eatingWindowCount >= 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>{eatingWindowCount}/7</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${eatingWindowCount >= 5 ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-dim text-slate-600'}`}>{eatingWindowCount}/7</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-slate-600">Gym Cadence (3 days)</span>
-              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${gymDays >= 3 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>{gymDays}/3</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${gymDays >= 3 ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-dim text-slate-600'}`}>{gymDays}/3</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-slate-600">Writing Margin (2.5kw)</span>
-              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${writingOutput >= 2500 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>{writingOutput}w</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${writingOutput >= 2500 ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-dim text-slate-600'}`}>{writingOutput}w</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-slate-600">80/10/10 Audit Check (7)</span>
-              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${financialDays >= 7 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>{financialDays}/7</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${financialDays >= 7 ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-dim text-slate-600'}`}>{financialDays}/7</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-slate-600">Spiritual Rhythm (7 days)</span>
-              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${spiritualDays >= 7 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>{spiritualDays}/7</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${spiritualDays >= 7 ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-dim text-slate-600'}`}>{spiritualDays}/7</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Interactive AI Terminal */}
-      <div className="lg:col-span-2 geometric-card flex flex-col h-[580px] bg-slate-950 border-slate-800 shadow-2xl relative">
+      <div className="lg:col-span-2 geometric-card flex flex-col h-[580px] bg-cream border-surface-dim shadow-2xl relative">
         {/* Terminal Header */}
-        <div className="h-12 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between shrink-0">
+        <div className="h-12 border-b px-4 flex items-center justify-between shrink-0" style={{ background: 'var(--tsd-forest)', borderColor: 'var(--tsd-forest-mid)' }}>
           <div className="flex items-center gap-2">
-            <Terminal className="text-emerald-500 w-4 h-4" />
-            <span className="font-mono text-xs font-bold text-slate-300">TWIN_FOCUS_COACH_CLI_v1.08</span>
+            <Terminal className="text-emerald-400 w-4 h-4" />
+            <span className="font-mono text-xs font-bold" style={{ color: 'rgba(248,244,239,0.75)' }}>dean_tracker_COACH_CLI_v1.08</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-[10px] font-mono text-slate-500">SECURE SHELL</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-[10px] font-mono" style={{ color: 'rgba(248,244,239,0.45)' }}>SECURE SHELL</span>
           </div>
         </div>
 
         {/* Message Log */}
-        <div className="flex-1 p-4 overflow-y-auto font-mono text-xs flex flex-col gap-4 bg-slate-950">
+        <div className="flex-1 p-4 overflow-y-auto font-mono text-xs flex flex-col gap-4 bg-cream">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
               <motion.div
@@ -478,7 +478,7 @@ What specific protocol adjustments do you need help with?`;
                   className={`p-3 rounded-lg leading-relaxed whitespace-pre-wrap ${
                     msg.role === 'user'
                       ? 'bg-emerald-600 text-white rounded-tr-none'
-                      : 'bg-slate-900 text-emerald-400 border border-slate-800 rounded-tl-none font-medium'
+                      : 'bg-white text-emerald-900 border border-surface-dim rounded-tl-none font-medium'
                   }`}
                 >
                   {msg.text}
@@ -493,7 +493,7 @@ What specific protocol adjustments do you need help with?`;
                 className="self-start flex flex-col items-start max-w-[80%]"
               >
                 <div className="text-[9px] text-slate-500 mb-1">SYSTEMS_COACH is analyzing telemetry...</div>
-                <div className="p-3 bg-slate-900 border border-slate-800 rounded-lg rounded-tl-none flex items-center gap-1.5">
+                <div className="bg-cream border border-surface-dim rounded-lg p-4 font-mono text-[11px] leading-relaxed text-forest max-h-[300px] overflow-y-auto">
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></span>
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce delay-75"></span>
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce delay-150"></span>
@@ -505,15 +505,16 @@ What specific protocol adjustments do you need help with?`;
         </div>
 
         {/* Terminal Input Box */}
-        <form onSubmit={sendMessage} className="h-16 bg-slate-900 border-t border-slate-800 flex items-center p-3 shrink-0">
-          <div className="flex-1 flex items-center gap-2 bg-slate-950 border border-slate-800 rounded px-3 py-1.5 focus-within:ring-1 focus-within:ring-emerald-500/50">
-            <span className="text-emerald-500 font-bold font-mono text-sm shrink-0">$</span>
+        <form onSubmit={sendMessage} className="h-16 bg-cream border-t border-surface-dim flex items-center p-3 shrink-0">
+          <div className="flex-1 flex items-center gap-2 rounded px-3 py-1.5 focus-within:ring-1 focus-within:ring-emerald-500/50" style={{ background: 'var(--tsd-forest)', border: '1px solid var(--tsd-forest-mid)' }}>
+            <span className="text-emerald-400 font-bold font-mono text-sm shrink-0">$</span>
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask coach: 'how is my window adherence?' or 'give me gym advice'..."
-              className="flex-1 bg-transparent text-emerald-400 focus:outline-none font-mono text-xs placeholder:text-slate-700"
+              className="flex-1 bg-transparent text-emerald-300 focus:outline-none font-mono text-xs"
+              style={{ '::placeholder': { color: 'rgba(248,244,239,0.3)' } } as React.CSSProperties}
             />
           </div>
           <Button

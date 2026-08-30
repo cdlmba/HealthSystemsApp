@@ -22,7 +22,16 @@
         "dailyProtein": { "type": "number", "description": "Daily Protein Estimate (g)" },
         "hydration": { "type": "integer", "description": "Hydration (glasses / 8+)" },
         "mobility": { "type": "boolean", "description": "Mobility / Sit-to-Stands" },
-        "notes": { "type": "string", "description": "Daily Notes" }
+        "notes": { "type": "string", "description": "Daily Notes" },
+        "caloriesLogged": { "type": "number", "description": "Calories logged" },
+        "proteinLogged": { "type": "number", "description": "Protein logged" },
+        "fatLogged": { "type": "number", "description": "Fat logged" },
+        "carbsLogged": { "type": "number", "description": "Carbs logged" },
+        "stressLevel": { "type": "number", "description": "Stress Level (1-5)" },
+        "waterOz": { "type": "number", "description": "Water (oz)" },
+        "morningWeight": { "type": "number", "description": "Morning Weight" },
+        "workoutSessionId": { "type": "string", "description": "Workout Session ID" },
+        "zone2Minutes": { "type": "number", "description": "Zone 2 Minutes" }
       },
       "required": ["date", "userId"]
     },
@@ -36,6 +45,36 @@
             "photoURL": { "type": "string" }
         },
         "required": ["email"]
+    },
+    "WorkoutSession": {
+        "title": "Workout Session",
+        "type": "object",
+        "properties": {
+            "userId": { "type": "string" },
+            "date": { "type": "string" },
+            "templateName": { "type": "string" },
+            "completedAt": { "type": "string" }
+        },
+        "required": ["userId", "date", "templateName"]
+    },
+    "Exercise": {
+        "title": "Exercise",
+        "type": "object",
+        "properties": {
+            "userId": { "type": "string" },
+            "name": { "type": "string" }
+        },
+        "required": ["userId", "name"]
+    },
+    "WeeklySummary": {
+        "title": "Weekly Summary",
+        "type": "object",
+        "properties": {
+            "userId": { "type": "string" },
+            "weekStart": { "type": "string" },
+            "avgWeight": { "type": "number" }
+        },
+        "required": ["userId", "weekStart"]
     }
   },
   "firestore": {
@@ -46,6 +85,18 @@
     "/users/{userId}": {
         "schema": "UserProfile",
         "description": "User profiles"
+    },
+    "/workoutSessions/{sessionId}": {
+        "schema": "WorkoutSession",
+        "description": "User workout sessions"
+    },
+    "/exercises/{exerciseId}": {
+        "schema": "Exercise",
+        "description": "User defined exercises"
+    },
+    "/weeklySummaries/{summaryId}": {
+        "schema": "WeeklySummary",
+        "description": "Weekly summaries and recommendations"
     }
   }
 }

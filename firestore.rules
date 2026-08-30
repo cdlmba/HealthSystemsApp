@@ -44,6 +44,33 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isOwner(existing().userId);
     }
 
+    match /wellnessPlans/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    match /foodLogs/{logId} {
+      allow read, write: if isSignedIn() && logId.split('_')[0] == request.auth.uid;
+    }
+
+    match /workoutSessions/{sessionId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && isOwner(existing().userId);
+    }
+
+    match /exercises/{exerciseId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && isOwner(existing().userId);
+    }
+
+    match /weeklySummaries/{summaryId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && isOwner(existing().userId);
+    }
+
     // Rules for User Profiles
     match /users/{userId} {
       allow read: if isSignedIn();

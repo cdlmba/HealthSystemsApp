@@ -1,4 +1,4 @@
-export interface HealthLog {
+export interface DailyLog {
   id?: string;
   date: string; // ISO string format
   userId: string;
@@ -40,7 +40,20 @@ export interface HealthLog {
   hydration?: number; // glasses
   mobility?: boolean; // sit-to-stands or simple mobility drills
   notes?: string;
+
+  // Dean Tracker Fields
+  caloriesLogged?: number;
+  proteinLogged?: number;
+  fatLogged?: number;
+  carbsLogged?: number;
+  stressLevel?: number; // 1-5
+  waterOz?: number; // ounces
+  morningWeight?: number; // alias to weight
+  workoutSessionId?: string; // FK to workoutSessions
+  zone2Minutes?: number; // cardio minutes
 }
+
+export type HealthLog = DailyLog;
 
 export interface WeeklyData {
   avgWeight: number;
@@ -52,7 +65,32 @@ export interface WeeklyData {
   financesPercent: number;
   spiritualPercent: number;
   avgDailyCalls: number;
-  logs: HealthLog[];
+  logs: DailyLog[];
+}
+
+export interface WeeklyRecommendation {
+  lever: 'calories' | 'steps' | 'hold';
+  direction: 'increase' | 'decrease' | 'maintain';
+  amount: number;
+  rationale: string;
+  generatedAt: string;
+}
+
+export interface WeeklySummary {
+  id?: string;
+  userId: string;
+  weekStart: string; // yyyy-MM-dd
+  avgWeight: number;
+  avgCalories: number;
+  avgProtein: number;
+  avgSteps: number;
+  trainingSessions: number;
+  zone2Sessions: number;
+  avgSleepHours: number;
+  avgStressLevel: number;
+  recommendation: WeeklyRecommendation;
+  acceptedAt?: string;
+  acceptedLever?: string;
 }
 
 // ── Food / Nutrition Types ──────────────────────────────────────────────────
@@ -122,6 +160,55 @@ export interface WellnessPlan {
 
   // Notes
   notes: string;
+
+  // Dean Tracker Fields
+  phase?: 'cut' | 'bulk' | 'maintain';
+  weeklyRateTarget?: number; // % body weight/week
+  heightInches?: number;
+  estimatedBodyFat?: number; // %
+  bodyWeightLbs?: number; // current body weight at plan creation
+  trainingDaysPerWeek?: number; // alias to targetGymDaysPerWeek
+  zone2DaysPerWeek?: number;
+  restTimerSeconds?: number;
+  currentWeekCalorieTarget?: number;
+  currentWeekStepTarget?: number;
+  lastAdjustedAt?: string; // ISO
+  lastRecommendation?: WeeklyRecommendation;
+}
+
+// ── Workout Types ──────────────────────────────────────────────────────────
+
+export interface WorkoutSet {
+  exerciseId: string;
+  exerciseName: string;
+  setNumber: number;
+  weight: number;
+  reps: number;
+  rir: number; // Reps In Reserve 0-4
+  isWarmup?: boolean;
+}
+
+export interface WorkoutSession {
+  id?: string;
+  userId: string;
+  date: string; // yyyy-MM-dd
+  templateName: string;
+  notes?: string;
+  durationMinutes?: number;
+  sets: WorkoutSet[];
+  completedAt: string; // ISO
+}
+
+export interface Exercise {
+  id?: string;
+  userId: string;
+  name: string;
+  category: 'push' | 'pull' | 'legs' | 'core' | 'cardio';
+  defaultRepRange: [number, number];
+  targetRIR: number;
+  lastLoad?: number;
+  lastReps?: number;
+  notes?: string;
 }
 
 // ── USDA Search Types ───────────────────────────────────────────────────────

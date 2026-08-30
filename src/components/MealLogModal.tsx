@@ -1,12 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { MealEntry, MacroTotals, USDAFoodItem, DailyFoodLog } from '../types';
 import { searchFoods, extractMacros, getServingInfo } from '../lib/usda';
 import {
   Search, Plus, Trash2, UtensilsCrossed, Loader2,
-  Flame, Beef, Droplets, Wheat, CheckCircle2, X
+  CheckCircle2, X
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -21,13 +20,6 @@ interface MealLogModalProps {
 }
 
 const MEAL_TYPES: Array<MealEntry['mealType']> = ['breakfast', 'lunch', 'dinner', 'snack'];
-
-const MACRO_COLORS = {
-  calories: 'text-orange-600 bg-orange-50 border-orange-100',
-  protein: 'text-blue-600 bg-blue-50 border-blue-100',
-  fat: 'text-amber-600 bg-amber-50 border-amber-100',
-  netCarbs: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-};
 
 function calcTotals(meals: MealEntry[]): MacroTotals {
   return meals.reduce(
@@ -58,7 +50,6 @@ export default function MealLogModal({
   const [mealType, setMealType] = useState<MealEntry['mealType']>('breakfast');
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reset state when modal opens with fresh data
   React.useEffect(() => {
     if (open) {
       setMeals(existingLog?.meals || []);
@@ -115,8 +106,7 @@ export default function MealLogModal({
       mealType,
       loggedAt: new Date().toISOString(),
     };
-    const updated = [...meals, entry];
-    setMeals(updated);
+    setMeals([...meals, entry]);
     setSelectedFood(null);
     setServingQty(1);
   };
@@ -139,44 +129,41 @@ export default function MealLogModal({
   };
 
   const totals = calcTotals(meals);
-
-  const pct = (val: number, target?: number) =>
-    target ? Math.min(Math.round((val / target) * 100), 150) : null;
+  const pct = (val: number, target?: number) => target ? Math.min(Math.round((val / target) * 100), 150) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-2xl bg-[var(--tsd-bg)] border-2 border-[var(--tsd-surface-dim)] rounded-2xl shadow-2xl p-0 flex flex-col max-h-[90vh] w-[95vw]">
+        
         {/* Header */}
-        <DialogHeader className="p-5 pb-4 border-b border-slate-100 bg-slate-50 shrink-0">
-          <DialogTitle className="flex items-center gap-2.5 text-slate-800 text-base font-extrabold tracking-tight">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow">
-              <UtensilsCrossed className="w-4 h-4 text-white" />
+        <DialogHeader className="p-4 border-b border-[var(--tsd-surface-dim)] bg-[var(--tsd-surface)] shrink-0">
+          <DialogTitle className="flex items-center gap-2.5 text-[var(--tsd-text)] text-base font-extrabold tracking-tight">
+            <div className="w-8 h-8 bg-[var(--tsd-forest)] rounded-lg flex items-center justify-center shadow">
+              <UtensilsCrossed className="w-4 h-4 text-[#0e1412]" />
             </div>
             Meal Log — {format(date, 'EEE, MMM d')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col flex-1 overflow-hidden">
+          
           {/* Macro Totals Bar */}
-          <div className="grid grid-cols-4 gap-3 p-4 border-b border-slate-100 shrink-0 bg-white">
+          <div className="grid grid-cols-4 gap-2 p-3 border-b border-[var(--tsd-surface-dim)] shrink-0 bg-[var(--tsd-surface-2)]">
             {([ 
-              { label: 'Calories', val: totals.calories, target: targets?.calories, unit: 'kcal', key: 'calories' },
-              { label: 'Protein', val: totals.protein, target: targets?.protein, unit: 'g', key: 'protein' },
-              { label: 'Fat', val: totals.fat, target: targets?.fat, unit: 'g', key: 'fat' },
-              { label: 'Net Carbs', val: totals.netCarbs, target: targets?.netCarbs, unit: 'g', key: 'netCarbs' },
-            ] as const).map(({ label, val, target, unit, key }) => {
+              { label: 'Calories', val: totals.calories, target: targets?.calories, unit: 'kcal', color: 'var(--tsd-gold)' },
+              { label: 'Protein', val: totals.protein, target: targets?.protein, unit: 'g', color: 'var(--tsd-forest)' },
+              { label: 'Fat', val: totals.fat, target: targets?.fat, unit: 'g', color: 'var(--tsd-gold-light)' },
+              { label: 'Carbs', val: totals.netCarbs, target: targets?.netCarbs, unit: 'g', color: 'var(--tsd-forest-mid)' },
+            ] as const).map(({ label, val, target, unit, color }) => {
               const p = pct(val, target);
               return (
-                <div key={key} className={`rounded-lg border p-2.5 flex flex-col gap-1 ${MACRO_COLORS[key]}`}>
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest opacity-70">{label}</span>
-                  <span className="text-lg font-black leading-none">{val}</span>
-                  <span className="text-[9px] font-semibold opacity-60">{unit}{target ? ` / ${target}` : ''}</span>
+                <div key={label} className="rounded-xl border-2 border-[var(--tsd-surface-dim)] p-2 flex flex-col gap-0.5 bg-[var(--tsd-bg)]">
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-[var(--tsd-text-dim)]">{label}</span>
+                  <span className="text-base font-black leading-none mt-1" style={{ color }}>{val}</span>
+                  <span className="text-[8px] font-bold uppercase text-[var(--tsd-text-dim)]">{unit}{target ? ` / ${target}` : ''}</span>
                   {p !== null && (
-                    <div className="mt-1 h-1 rounded-full bg-black/10 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-current transition-all"
-                        style={{ width: `${Math.min(p, 100)}%`, opacity: 0.7 }}
-                      />
+                    <div className="mt-1 h-1 rounded-full bg-[var(--tsd-surface-dim)] overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(p, 100)}%`, background: color }} />
                     </div>
                   )}
                 </div>
@@ -185,33 +172,32 @@ export default function MealLogModal({
           </div>
 
           {/* Food Search + Add */}
-          <div className="p-4 border-b border-slate-100 shrink-0 bg-white space-y-3">
-            <div className="flex gap-2 items-center">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="p-3 border-b border-[var(--tsd-surface-dim)] shrink-0 bg-[var(--tsd-surface)] space-y-3">
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--tsd-text-dim)]" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => handleSearch(e.target.value)}
-                  placeholder="Search USDA food database… (e.g. 'chicken breast', 'eggs')"
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
+                  placeholder="Search USDA food..."
+                  className="w-full pl-9 pr-3 h-12 text-sm font-bold border-2 border-[var(--tsd-surface-dim)] bg-[var(--tsd-bg)] text-[var(--tsd-text)] rounded-xl focus:outline-none focus:border-[var(--tsd-forest)] transition"
                 />
-                {isSearching && (
-                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
-                )}
+                {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--tsd-text-dim)] animate-spin" />}
               </div>
+              
               <select
                 value={mealType}
                 onChange={e => setMealType(e.target.value as MealEntry['mealType'])}
-                className="px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 bg-white text-slate-700 font-semibold capitalize"
+                className="h-12 px-3 text-sm font-bold border-2 border-[var(--tsd-surface-dim)] bg-[var(--tsd-bg)] text-[var(--tsd-text)] rounded-xl focus:outline-none focus:border-[var(--tsd-forest)] capitalize w-full"
               >
-                {MEAL_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                {MEAL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
 
-            {/* Search Results Dropdown */}
+            {/* Search Results */}
             {searchResults.length > 0 && (
-              <div className="border border-slate-200 rounded-lg overflow-hidden shadow-md max-h-48 overflow-y-auto divide-y divide-slate-50">
+              <div className="border-2 border-[var(--tsd-surface-dim)] rounded-xl overflow-hidden shadow-lg max-h-48 overflow-y-auto bg-[var(--tsd-surface-2)]">
                 {searchResults.map(food => {
                   const serving = getServingInfo(food);
                   const preview = extractMacros(food, 1, serving.grams);
@@ -219,16 +205,15 @@ export default function MealLogModal({
                     <button
                       key={food.fdcId}
                       onClick={() => handleSelectFood(food)}
-                      className="w-full px-3 py-2.5 text-left hover:bg-emerald-50 transition-colors flex items-center justify-between gap-3 group"
+                      className="w-full px-3 py-3 text-left hover:bg-[var(--tsd-surface-dim)] transition-colors flex items-center justify-between gap-3 border-b border-[var(--tsd-surface-dim)] last:border-0"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-800 truncate group-hover:text-emerald-700">{food.description}</p>
-                        {food.brandOwner && <p className="text-[10px] text-slate-400 truncate">{food.brandOwner}</p>}
+                        <p className="text-xs font-bold text-[var(--tsd-text)] truncate">{food.description}</p>
+                        {food.brandOwner && <p className="text-[10px] font-bold uppercase text-[var(--tsd-text-dim)] truncate">{food.brandOwner}</p>}
                       </div>
-                      <div className="flex gap-2 text-[10px] font-bold shrink-0">
-                        <span className="text-orange-600">{preview.calories}kcal</span>
-                        <span className="text-blue-600">{preview.protein}p</span>
-                        <span className="text-emerald-600">{preview.netCarbs}nc</span>
+                      <div className="flex gap-2 text-[10px] font-black shrink-0">
+                        <span style={{ color: 'var(--tsd-gold)' }}>{preview.calories}</span>
+                        <span style={{ color: 'var(--tsd-forest)' }}>{preview.protein}p</span>
                       </div>
                     </button>
                   );
@@ -236,38 +221,33 @@ export default function MealLogModal({
               </div>
             )}
 
-            {searchError && (
-              <p className="text-xs text-rose-600 font-medium">{searchError}</p>
-            )}
+            {searchError && <p className="text-xs text-[var(--tsd-danger)] font-bold">{searchError}</p>}
 
-            {/* Selected food confirmation row */}
+            {/* Selected food confirmation */}
             {selectedFood && (() => {
               const serving = getServingInfo(selectedFood);
-              const preview = extractMacros(selectedFood, servingQty, serving.grams);
               return (
-                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-emerald-800 truncate">{selectedFood.description}</p>
-                    <p className="text-[10px] text-emerald-600 font-medium">
-                      {preview.calories} kcal · {preview.protein}g protein · {preview.fat}g fat · {preview.netCarbs}g net carbs
-                    </p>
+                <div className="flex flex-col gap-3 bg-[rgba(74,222,128,0.05)] border-2 border-[var(--tsd-forest)] rounded-xl p-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-[var(--tsd-forest)] shrink-0" />
+                    <p className="text-xs font-black text-[var(--tsd-text)] truncate leading-tight">{selectedFood.description}</p>
                   </div>
+                  
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] text-slate-500 font-semibold">Qty:</span>
                     <input
                       type="number"
-                      min={0.25}
-                      step={0.25}
+                      inputMode="decimal"
+                      min={0.25} step={0.25}
                       value={servingQty}
                       onChange={e => setServingQty(Math.max(0.25, Number(e.target.value)))}
-                      className="w-16 text-center text-xs border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                      className="w-20 text-center text-sm font-black border-2 border-[var(--tsd-forest)] bg-[var(--tsd-bg)] text-[var(--tsd-text)] rounded-lg h-10 focus:outline-none"
                     />
-                    <span className="text-[10px] text-slate-500">{serving.unit}</span>
-                    <Button onClick={handleAddMeal} size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-7 px-3 gap-1 font-bold">
-                      <Plus className="w-3.5 h-3.5" /> Add
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tsd-text-dim)] flex-1 truncate">{serving.unit}</span>
+                    
+                    <Button onClick={handleAddMeal} className="bg-[var(--tsd-forest)] text-[#0e1412] hover:bg-[var(--tsd-forest-mid)] text-xs h-10 px-4 font-black tracking-widest uppercase">
+                      <Plus className="w-4 h-4 mr-1" /> Add
                     </Button>
-                    <button onClick={() => setSelectedFood(null)} className="text-slate-400 hover:text-slate-600">
+                    <button onClick={() => setSelectedFood(null)} className="p-2 text-[var(--tsd-text-dim)] bg-[var(--tsd-surface)] rounded-lg ml-1 border-2 border-[var(--tsd-surface-dim)]">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -277,12 +257,12 @@ export default function MealLogModal({
           </div>
 
           {/* Meal List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-50/50">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-[var(--tsd-bg)]">
             {meals.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center text-slate-400">
+              <div className="flex flex-col items-center justify-center py-10 text-center text-[var(--tsd-text-dim)]">
                 <UtensilsCrossed className="w-10 h-10 mb-3 opacity-20" />
-                <p className="text-sm font-medium">No meals logged yet</p>
-                <p className="text-xs mt-1">Search for a food above to start building your log</p>
+                <p className="text-sm font-bold">No meals logged</p>
+                <p className="text-xs mt-1">Search to build your log</p>
               </div>
             ) : (
               (() => {
@@ -293,26 +273,28 @@ export default function MealLogModal({
                 });
                 return MEAL_TYPES.filter(t => byMeal[t]?.length > 0).map(type => (
                   <div key={type}>
-                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1.5 capitalize">{type}</p>
-                    <div className="space-y-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--tsd-text-dim)] mb-2 capitalize">{type}</p>
+                    <div className="space-y-2">
                       {byMeal[type].map(meal => (
-                        <div key={meal.id} className="bg-white border border-slate-100 rounded-lg px-3 py-2.5 flex items-center gap-3 hover:border-slate-200 transition-colors group">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-slate-800 truncate">{meal.name}</p>
-                            <p className="text-[10px] text-slate-400">
-                              {meal.servingQty} {meal.servingUnit}
-                              {meal.brand && ` · ${meal.brand}`}
-                            </p>
+                        <div key={meal.id} className="bg-[var(--tsd-surface)] border-2 border-[var(--tsd-surface-dim)] rounded-xl p-3 flex flex-col gap-2 relative">
+                          <div className="flex justify-between items-start gap-4 pr-6">
+                            <div>
+                              <p className="text-xs font-bold text-[var(--tsd-text)] leading-tight">{meal.name}</p>
+                              <p className="text-[10px] font-bold text-[var(--tsd-text-dim)] uppercase mt-1">
+                                {meal.servingQty} {meal.servingUnit} {meal.brand && `· ${meal.brand}`}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex gap-3 text-[10px] font-bold shrink-0">
-                            <span className="text-orange-600">{meal.calories}kcal</span>
-                            <span className="text-blue-600">{meal.protein}g P</span>
-                            <span className="text-amber-600">{meal.fat}g F</span>
-                            <span className="text-emerald-600">{meal.netCarbs}g NC</span>
+                          
+                          <div className="flex gap-3 text-[10px] font-black">
+                            <span style={{ color: 'var(--tsd-gold)' }}>{meal.calories}kcal</span>
+                            <span style={{ color: 'var(--tsd-forest)' }}>{meal.protein}g P</span>
+                            <span style={{ color: 'var(--tsd-gold-light)' }}>{meal.fat}g F</span>
                           </div>
+
                           <button
                             onClick={() => handleRemoveMeal(meal.id)}
-                            className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 transition-all"
+                            className="absolute right-2 top-2 p-1.5 text-[var(--tsd-danger)] bg-[rgba(248,113,113,0.1)] rounded-lg"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -326,17 +308,14 @@ export default function MealLogModal({
           </div>
 
           {/* Footer Save */}
-          <div className="p-4 border-t border-slate-100 bg-white shrink-0 flex items-center justify-between gap-4">
-            <span className="text-xs text-slate-400 font-medium">{meals.length} item{meals.length !== 1 ? 's' : ''} logged</span>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)} className="text-xs border-slate-200 text-slate-600">
-                Cancel
-              </Button>
-              <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold gap-2 px-5">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Save Meal Log
-              </Button>
-            </div>
+          <div className="p-4 border-t border-[var(--tsd-surface-dim)] bg-[var(--tsd-surface)] shrink-0 flex items-center justify-between gap-4">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="text-xs font-bold border-2 border-[var(--tsd-surface-dim)] bg-[var(--tsd-bg)] text-[var(--tsd-text)] h-12">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} className="flex-1 bg-[var(--tsd-forest)] text-[#0e1412] hover:bg-[var(--tsd-forest-mid)] text-xs font-black uppercase tracking-widest h-12 gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              Save Log
+            </Button>
           </div>
         </div>
       </DialogContent>
