@@ -139,7 +139,7 @@ export default function MealLogModal({
         <DialogHeader className="p-4 border-b border-[var(--tsd-surface-dim)] bg-[var(--tsd-surface)] shrink-0">
           <DialogTitle className="flex items-center gap-2.5 text-[var(--tsd-text)] text-base font-extrabold tracking-tight">
             <div className="w-8 h-8 bg-[var(--tsd-forest)] rounded-lg flex items-center justify-center shadow">
-              <UtensilsCrossed className="w-4 h-4 text-[#0e1412]" />
+              <UtensilsCrossed className="w-4 h-4 text-[var(--tsd-forest-text)]" />
             </div>
             Meal Log — {format(date, 'EEE, MMM d')}
           </DialogTitle>
@@ -244,7 +244,7 @@ export default function MealLogModal({
                     />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tsd-text-dim)] flex-1 truncate">{serving.unit}</span>
                     
-                    <Button onClick={handleAddMeal} className="bg-[var(--tsd-forest)] text-[#0e1412] hover:bg-[var(--tsd-forest-mid)] text-xs h-10 px-4 font-black tracking-widest uppercase">
+                    <Button onClick={handleAddMeal} className="bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] hover:bg-[var(--tsd-forest-mid)] text-xs h-10 px-4 font-black tracking-widest uppercase">
                       <Plus className="w-4 h-4 mr-1" /> Add
                     </Button>
                     <button onClick={() => setSelectedFood(null)} className="p-2 text-[var(--tsd-text-dim)] bg-[var(--tsd-surface)] rounded-lg ml-1 border-2 border-[var(--tsd-surface-dim)]">
@@ -312,7 +312,7 @@ export default function MealLogModal({
             <Button variant="outline" onClick={() => onOpenChange(false)} className="text-xs font-bold border-2 border-[var(--tsd-surface-dim)] bg-[var(--tsd-bg)] text-[var(--tsd-text)] h-12">
               Cancel
             </Button>
-            <Button onClick={handleSave} className="flex-1 bg-[var(--tsd-forest)] text-[#0e1412] hover:bg-[var(--tsd-forest-mid)] text-xs font-black uppercase tracking-widest h-12 gap-2">
+            <Button onClick={handleSave} className="flex-1 bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] hover:bg-[var(--tsd-forest-mid)] text-xs font-black uppercase tracking-widest h-12 gap-2">
               <CheckCircle2 className="w-4 h-4" />
               Save Log
             </Button>

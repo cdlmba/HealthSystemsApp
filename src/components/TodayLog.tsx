@@ -252,7 +252,7 @@ export default function TodayLog({ user }: { user: any }) {
                         </div>
                         <button
                           onClick={() => setMealModalDate(selectedDate)}
-                          className="mt-2 w-full flex items-center justify-center gap-2 bg-[var(--tsd-forest)] text-[#0e1412] h-12 rounded-xl font-bold uppercase tracking-widest text-sm"
+                          className="mt-2 w-full flex items-center justify-center gap-2 bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] h-12 rounded-xl font-bold uppercase tracking-widest text-sm"
                         >
                           <UtensilsCrossed className="w-4 h-4" /> Log Food
                         </button>
@@ -270,8 +270,8 @@ export default function TodayLog({ user }: { user: any }) {
                       onClick={() => updateLog(selectedDate, metric.id, !val)}
                       className={`bool-btn ${val ? 'bool-on' : ''}`}
                     >
-                      <div className={`w-5 h-5 rounded flex items-center justify-center border-2 ${val ? 'bg-[var(--tsd-forest)] border-[var(--tsd-forest)]' : 'border-[var(--tsd-text-dim)]'}`}>
-                        {val && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="#0e1412" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                      <div className={`w-5 h-5 rounded flex items-center justify-center border-2 ${val ? 'bg-[var(--tsd-forest)] border-[var(--tsd-forest)] text-[var(--tsd-forest-text)]' : 'border-[var(--tsd-text-dim)]'}`}>
+                        {val && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                       </div>
                       {metric.label}
                     </button>
@@ -444,13 +444,13 @@ export default function TodayLog({ user }: { user: any }) {
         <div className="flex bg-[var(--tsd-surface-dim)] p-1 rounded-xl">
           <button
             onClick={() => setViewMode('day')}
-            className={`flex items-center justify-center px-4 h-9 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${viewMode === 'day' ? 'bg-[var(--tsd-forest)] text-[#0e1412] shadow' : 'text-[var(--tsd-text-dim)]'}`}
+            className={`flex items-center justify-center px-4 h-9 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${viewMode === 'day' ? 'bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] shadow' : 'text-[var(--tsd-text-dim)]'}`}
           >
             <Calendar1 className="w-3.5 h-3.5 mr-1.5" /> Day
           </button>
           <button
             onClick={() => setViewMode('week')}
-            className={`flex items-center justify-center px-4 h-9 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-[var(--tsd-forest)] text-[#0e1412] shadow' : 'text-[var(--tsd-text-dim)]'}`}
+            className={`flex items-center justify-center px-4 h-9 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] shadow' : 'text-[var(--tsd-text-dim)]'}`}
           >
             <LayoutGrid className="w-3.5 h-3.5 mr-1.5" /> Week
           </button>

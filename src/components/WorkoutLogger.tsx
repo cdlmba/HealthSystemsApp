@@ -165,7 +165,7 @@ export default function WorkoutLogger({ user }: { user: any }) {
               <option value="Pull">Pull</option>
               <option value="Legs">Legs</option>
             </select>
-            <Button onClick={handleCreateSession} className="h-12 text-sm font-bold tracking-widest uppercase bg-[var(--tsd-forest)] text-[#0e1412] hover:bg-[var(--tsd-forest-mid)] rounded-xl">
+            <Button onClick={handleCreateSession} className="h-12 text-sm font-bold tracking-widest uppercase bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] hover:bg-[var(--tsd-forest-mid)] rounded-xl">
               Start Workout
             </Button>
           </div>
@@ -292,7 +292,7 @@ export default function WorkoutLogger({ user }: { user: any }) {
               className="shadow-xl rounded-full h-14 px-8 font-bold tracking-wide uppercase text-xs flex items-center gap-2 transition-all hover:scale-105"
               style={{
                 background: saved ? 'var(--tsd-forest-mid)' : 'var(--tsd-gold)',
-                color: '#0e1412'
+                color: saved ? 'var(--tsd-forest-mid-text)' : '#0e1412'
               }}
             >
               {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Workout</>}

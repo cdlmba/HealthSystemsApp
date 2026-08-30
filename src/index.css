@@ -75,6 +75,8 @@
   --tsd-text:         #e8f5ee;   /* main text */
   --tsd-text-dim:     #8aad96;   /* secondary text */
   --tsd-danger:       #f87171;
+  --tsd-forest-text:  #0e1412;   /* dark text on light green bg */
+  --tsd-forest-mid-text: #0e1412;
 
   /* ── shadcn/ui dark overrides ────────────────────────────── */
   --background:       #0e1412;
@@ -132,6 +134,8 @@ html.light {
   --tsd-text:         #013220;
   --tsd-text-dim:     #717973;
   --tsd-danger:       #dc2626;
+  --tsd-forest-text:  #FFFFFF;   /* white text on dark green bg */
+  --tsd-forest-mid-text: #FFFFFF;
 
   --background:       #F8F4EF;
   --foreground:       #013220;

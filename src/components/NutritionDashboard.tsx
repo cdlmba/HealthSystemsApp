@@ -160,27 +160,25 @@ export default function NutritionDashboard({ user }: { user: any }) {
               Nutrition Analytics
             </span>
           </div>
-          <h2 className="tsd-serif text-2xl font-bold text-[#0e1412]">Macro Performance</h2>
-          <p className="text-xs font-medium mt-1" style={{ color: 'rgba(14,20,18,0.7)' }}>
+          <h2 className="tsd-serif text-2xl font-bold text-[var(--tsd-forest-mid-text)]">Macro Performance</h2>
+          <p className="text-xs font-medium mt-1 text-[var(--tsd-forest-mid-text)] opacity-70">
             Weekly breakdown vs targets
           </p>
         </div>
 
         {/* Week nav */}
-        <div className="flex items-center gap-3 relative z-10 shrink-0 bg-[#0e1412] p-1 rounded-xl">
+        <div className="flex items-center gap-3 relative z-10 shrink-0 bg-[var(--tsd-bg)] p-1 rounded-xl">
           <button
             onClick={() => setWeekOffset(v => v - 1)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[rgba(255,255,255,0.1)]"
-            style={{ color: 'rgba(255,255,255,0.7)' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--tsd-surface-dim)] text-[var(--tsd-text-dim)] hover:text-[var(--tsd-text)]"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-xs font-bold min-w-[130px] text-center text-white">{weekLabel}</span>
+          <span className="text-xs font-bold min-w-[130px] text-center text-[var(--tsd-text)]">{weekLabel}</span>
           <button
             onClick={() => setWeekOffset(v => Math.min(v + 1, 0))}
             disabled={weekOffset === 0}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-[rgba(255,255,255,0.1)]"
-            style={{ color: 'rgba(255,255,255,0.7)' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-[var(--tsd-surface-dim)] text-[var(--tsd-text-dim)] hover:text-[var(--tsd-text)]"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

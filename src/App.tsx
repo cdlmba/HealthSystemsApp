@@ -115,7 +115,7 @@ export default function App() {
               onClick={loginWithGoogle}
               size="lg"
               className="w-full gap-2.5 h-14 text-lg font-semibold tracking-wide transition-all"
-              style={{ background: 'var(--tsd-forest)', color: '#0e1412', borderRadius: '12px' }}
+              style={{ background: 'var(--tsd-forest)', color: 'var(--tsd-forest-text)', borderRadius: '12px' }}
             >
               <LogIn className="w-5 h-5" />
               Enter System
@@ -137,7 +137,7 @@ export default function App() {
       <header className="h-[var(--header-height)] flex items-center justify-between px-4 shrink-0 fixed top-0 left-0 right-0 z-40 bg-[var(--tsd-surface)] border-b border-[var(--tsd-surface-dim)]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--tsd-forest)]">
-            <span className="tsd-serif text-base font-medium text-[#0e1412]">DT</span>
+            <span className="tsd-serif text-base font-medium text-[var(--tsd-forest-text)]">DT</span>
           </div>
           <div className="flex flex-col">
             <h1 className="tsd-serif text-base font-semibold leading-none">Dean Tracker</h1>
