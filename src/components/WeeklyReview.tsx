@@ -29,7 +29,8 @@ import {
   TrendingUp,
   AlertTriangle,
   Flame,
-  Footprints
+  Footprints,
+  CalendarDays
 } from 'lucide-react';
 
 export default function WeeklyReview({ user, plan }: { user: any, plan: WellnessPlan | null }) {
@@ -152,6 +153,23 @@ export default function WeeklyReview({ user, plan }: { user: any, plan: Wellness
       };
     });
   }, [logs, plan]);
+
+  // Projected Weight Loss Calculations
+  let projectedWeeks = 0;
+  let projectedDate: Date | null = null;
+  let lbsToGoal = 0;
+  let weeklyRateLbs = 0;
+
+  if (plan?.targetWeightLbs && avgWeight && plan.weeklyRateTarget && plan.bodyWeightLbs && plan.phase) {
+    const isCut = plan.phase === 'cut';
+    lbsToGoal = isCut ? avgWeight - plan.targetWeightLbs : plan.targetWeightLbs - avgWeight;
+    weeklyRateLbs = plan.bodyWeightLbs * (plan.weeklyRateTarget / 100);
+
+    if (lbsToGoal > 0 && weeklyRateLbs > 0) {
+      projectedWeeks = lbsToGoal / weeklyRateLbs;
+      projectedDate = addDays(new Date(), Math.round(projectedWeeks * 7));
+    }
+  }
 
   if (!plan) return <div className="p-8 text-center text-slate-500">Loading plan...</div>;
 
@@ -288,6 +306,33 @@ export default function WeeklyReview({ user, plan }: { user: any, plan: Wellness
           
         </div>
       </div>
+
+      {projectedDate && (
+        <div className="geometric-card p-5 border-l-4" style={{ borderColor: 'var(--tsd-gold)', background: 'var(--tsd-gold-bg)' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-full" style={{ background: 'var(--tsd-surface)', color: 'var(--tsd-gold)' }}>
+                <CalendarDays className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--tsd-moss)' }}>Projected Goal Date</h4>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="tsd-serif text-2xl font-bold" style={{ color: 'var(--tsd-forest)' }}>
+                    {format(projectedDate, 'MMMM do, yyyy')}
+                  </span>
+                </div>
+                <p className="text-xs font-semibold mt-1" style={{ color: 'var(--tsd-moss)' }}>
+                  {projectedWeeks < 2 ? 'Almost there!' : `Based on your target rate of ${weeklyRateLbs.toFixed(1)} lbs/week`}
+                </p>
+              </div>
+            </div>
+            <div className="text-right sm:border-l sm:pl-6 border-[var(--tsd-surface-dim)]">
+              <span className="block text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--tsd-moss)' }}>Remaining</span>
+              <span className="text-xl font-bold" style={{ color: 'var(--tsd-forest)' }}>{lbsToGoal.toFixed(1)} <span className="text-sm font-semibold" style={{ color: 'var(--tsd-moss)' }}>lbs</span></span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Trends */}
       <div className="grid gap-6 lg:grid-cols-2">

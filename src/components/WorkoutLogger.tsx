@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { WorkoutSession, WorkoutSet } from '../types';
+import { WorkoutSession, WorkoutSet, Exercise } from '../types';
 import { format, parseISO } from 'date-fns';
 import { Button } from './ui/button';
 import { Dumbbell, Plus, Save, Trash2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -13,39 +13,57 @@ export default function WorkoutLogger({ user, plan }: { user: any, plan: any }) 
   const [templateName, setTemplateName] = useState('Upper Body');
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
 
   useEffect(() => {
     if (!user) return;
     
-    const loadSession = async () => {
-      setLoading(true);
-      if (user.isMock) {
-        const raw = localStorage.getItem(`dean_tracker_workout_${user.uid}_${date}`);
-        if (raw) {
-          setSession(JSON.parse(raw));
-          setTemplateName(JSON.parse(raw).templateName);
-        } else {
-          setSession(null);
-        }
+    setLoading(true);
+
+    if (user.isMock) {
+      const raw = localStorage.getItem(`dean_tracker_workout_${user.uid}_${date}`);
+      if (raw) {
+        setSession(JSON.parse(raw));
+        setTemplateName(JSON.parse(raw).templateName);
       } else {
-        const q = query(
-          collection(db, 'workoutSessions'),
-          where('userId', '==', user.uid),
-          where('date', '==', date)
-        );
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          const docData = snap.docs[0].data() as WorkoutSession;
-          setSession({ ...docData, id: snap.docs[0].id });
-          setTemplateName(docData.templateName);
-        } else {
-          setSession(null);
-        }
+        setSession(null);
+      }
+      const rawEx = localStorage.getItem(`dean_tracker_exercises_${user.uid}`);
+      if (rawEx) setSavedExercises(JSON.parse(rawEx));
+      
+      setLoading(false);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'workoutSessions'),
+      where('userId', '==', user.uid),
+      where('date', '==', date)
+    );
+    
+    const unsubSession = onSnapshot(q, (snap) => {
+      if (!snap.empty) {
+        const docData = snap.docs[0].data() as WorkoutSession;
+        setSession({ ...docData, id: snap.docs[0].id });
+        setTemplateName(docData.templateName);
+      } else {
+        setSession(null);
       }
       setLoading(false);
-    };
+    }, (error) => {
+      console.error("Error loading session:", error);
+      setLoading(false);
+    });
 
-    loadSession();
+    const exQuery = query(collection(db, 'exercises'), where('userId', '==', user.uid));
+    const unsubEx = onSnapshot(exQuery, (snap) => {
+      setSavedExercises(snap.docs.map(d => ({ id: d.id, ...d.data() } as Exercise)));
+    });
+
+    return () => {
+      unsubSession();
+      unsubEx();
+    };
   }, [user, date]);
 
   const handleCreateSession = () => {
@@ -99,13 +117,47 @@ export default function WorkoutLogger({ user, plan }: { user: any, plan: any }) 
     if (!session || !user) return;
     
     const sessionToSave = { ...session, templateName };
+    const uniqueExercises = Array.from(new Set(sessionToSave.sets.map(s => s.exerciseName)));
     
     if (user.isMock) {
       localStorage.setItem(`dean_tracker_workout_${user.uid}_${date}`, JSON.stringify(sessionToSave));
+      
+      let list: Exercise[] = JSON.parse(localStorage.getItem(`dean_tracker_exercises_${user.uid}`) || '[]');
+      let listChanged = false;
+      for (const exName of uniqueExercises) {
+        if (!list.find(e => e.name.toLowerCase() === exName.toLowerCase())) {
+          list.push({
+            id: `ex_${Date.now()}`,
+            userId: user.uid,
+            name: exName,
+            category: 'push',
+            defaultRepRange: [8, 12],
+            targetRIR: 2
+          });
+          listChanged = true;
+        }
+      }
+      if (listChanged) {
+        localStorage.setItem(`dean_tracker_exercises_${user.uid}`, JSON.stringify(list));
+        setSavedExercises(list);
+      }
     } else {
       const docRef = session.id ? doc(db, 'workoutSessions', session.id) : doc(collection(db, 'workoutSessions'));
       await setDoc(docRef, sessionToSave, { merge: true });
       if (!session.id) setSession({ ...sessionToSave, id: docRef.id });
+      
+      for (const exName of uniqueExercises) {
+        if (!savedExercises.find(e => e.name.toLowerCase() === exName.toLowerCase())) {
+          const newEx: Exercise = {
+            userId: user.uid,
+            name: exName,
+            category: 'push',
+            defaultRepRange: [8, 12],
+            targetRIR: 2
+          };
+          setDoc(doc(collection(db, 'exercises')), newEx);
+        }
+      }
     }
     
     setSaved(true);
@@ -195,6 +247,7 @@ export default function WorkoutLogger({ user, plan }: { user: any, plan: any }) 
                   <div className="flex items-center justify-between">
                     <input
                       type="text"
+                      list="exercise-suggestions"
                       value={exName}
                       onChange={e => {
                         (sets as any[]).forEach(s => handleUpdateSet(s._originalIndex, 'exerciseName', e.target.value));
@@ -298,6 +351,12 @@ export default function WorkoutLogger({ user, plan }: { user: any, plan: any }) 
               {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Workout</>}
             </Button>
           </div>
+          
+          <datalist id="exercise-suggestions">
+            {savedExercises.map(ex => (
+              <option key={ex.id || ex.name} value={ex.name} />
+            ))}
+          </datalist>
         </div>
       )}
     </div>
