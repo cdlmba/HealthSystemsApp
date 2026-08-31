@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { WellnessPlan } from './types';
 import { auth, loginWithGoogle, logout, db } from './lib/firebase';
 import TodayLog from './components/TodayLog';
 import WeeklyReview from './components/WeeklyReview';
@@ -13,32 +15,64 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
   const [user, setUser] = useState<any | null>(null);
+  const [plan, setPlan] = useState<Partial<WellnessPlan>>({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('today');
   const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setPlan({});
+      return;
+    }
+    
+    if (user.isMock) {
+      const handleStorage = () => {
+        const raw = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
+        if (raw) setPlan(JSON.parse(raw));
+      };
+      handleStorage();
+      window.addEventListener('storage', handleStorage);
+      // Custom event for same-window updates
+      window.addEventListener('planUpdated', handleStorage);
+      return () => {
+        window.removeEventListener('storage', handleStorage);
+        window.removeEventListener('planUpdated', handleStorage);
+      };
+    } else {
+      const unsubscribe = onSnapshot(doc(db, 'wellnessPlans', user.uid), (snap) => {
+        if (snap.exists()) {
+          setPlan(snap.data() as WellnessPlan);
+        } else {
+          setPlan({});
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
 
   useEffect(() => {
     // Just load the user directly
   }, [user]);
 
   useEffect(() => {
-    const savedMock = localStorage.getItem('dean_tracker_mock_user');
-    if (savedMock) {
-      setUser(JSON.parse(savedMock));
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       setLoading(false);
-      return;
-    }
-    
-    // Auto-login as mock user if no saved mock
-    const defaultMockUser = {
-      uid: 'mock_christopher_123',
-      displayName: 'Christopher (Dean Tracker)',
-      email: 'christopher@deantracker.com',
-      isMock: true
+    }, (error) => {
+      console.error("Auth state error:", error);
+      setLoading(false);
+    });
+
+    // Fallback: If Firebase takes longer than 5 seconds, drop loading state
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
     };
-    setUser(defaultMockUser);
-    localStorage.setItem('dean_tracker_mock_user', JSON.stringify(defaultMockUser));
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -112,7 +146,14 @@ export default function App() {
 
           <div className="flex flex-col gap-3">
             <Button
-              onClick={loginWithGoogle}
+              onClick={async () => {
+                try {
+                  alert("Connecting to Google Auth...");
+                  await loginWithGoogle();
+                } catch (err: any) {
+                  alert("Login error: " + err.message);
+                }
+              }}
               size="lg"
               className="w-full gap-2.5 h-14 text-lg font-semibold tracking-wide transition-all"
               style={{ background: 'var(--tsd-forest)', color: 'var(--tsd-forest-text)', borderRadius: '12px' }}
@@ -159,28 +200,28 @@ export default function App() {
       <main className={isWideScreen ? "screen-content-wide" : "screen-content"}>
         <AnimatePresence mode="wait">
           {activeTab === 'today' && (
-            <motion.div key="today" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-              <TodayLog user={user} />
+            <motion.div key="today" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
+              <TodayLog user={user} plan={plan} />
             </motion.div>
           )}
           {activeTab === 'food' && (
-            <motion.div key="food" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-              <NutritionDashboard user={user} />
+            <motion.div key="food" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
+              <NutritionDashboard user={user} plan={plan} />
             </motion.div>
           )}
           {activeTab === 'workout' && (
-            <motion.div key="workout" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-              <WorkoutLogger user={user} />
+            <motion.div key="workout" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
+              <WorkoutLogger user={user} plan={plan} />
             </motion.div>
           )}
           {activeTab === 'weekly' && (
-            <motion.div key="weekly" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-              <WeeklyReview user={user} />
+            <motion.div key="weekly" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
+              <WeeklyReview user={user} plan={plan} />
             </motion.div>
           )}
           {activeTab === 'plan' && (
-            <motion.div key="plan" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-              <PlanEditor user={user} />
+            <motion.div key="plan" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
+              <PlanEditor user={user} plan={plan} />
             </motion.div>
           )}
         </AnimatePresence>

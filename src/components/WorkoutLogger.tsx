@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { Dumbbell, Plus, Save, Trash2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-export default function WorkoutLogger({ user }: { user: any }) {
+export default function WorkoutLogger({ user, plan }: { user: any, plan: any }) {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [templateName, setTemplateName] = useState('Upper Body');

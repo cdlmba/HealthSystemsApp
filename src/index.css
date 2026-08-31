@@ -221,6 +221,28 @@ html.light {
   gap: 0.5rem;
 }
 
+/* ── Section Headers (TodayLog) ───────────────────────────────────────────── */
+.section-header {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--tsd-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tsd-surface-dim);
+  margin-bottom: 0.75rem;
+  margin-top: 1rem;
+}
+
+.section-header-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  background-color: var(--tsd-forest);
+  border-radius: 9999px;
+}
+
 /* ── Serif headline ───────────────────────────────────────────────────────── */
 .tsd-serif {
   font-family: 'Bodoni Moda', Georgia, serif;

@@ -32,25 +32,12 @@ import {
   Footprints
 } from 'lucide-react';
 
-export default function WeeklyReview({ user }: { user: any }) {
+export default function WeeklyReview({ user, plan }: { user: any, plan: WellnessPlan | null }) {
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  const [plan, setPlan] = useState<WellnessPlan | null>(null);
   const [currentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   useEffect(() => {
     if (!user) return;
-
-    const loadData = async () => {
-      // Load Plan
-      if (user.isMock) {
-        const raw = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
-        if (raw) setPlan(JSON.parse(raw));
-      } else {
-        const snap = await getDoc(doc(db, 'wellnessPlans', user.uid));
-        if (snap.exists()) setPlan(snap.data() as WellnessPlan);
-      }
-    };
-    loadData();
 
     // Listen to logs
     if (user.isMock) {

@@ -50,31 +50,15 @@ const SEED_FOOD_LOGS = (userId: string, weekStart: Date): DailyFoodLog[] =>
     };
   });
 
-export default function NutritionDashboard({ user }: { user: any }) {
+export default function NutritionDashboard({ user, plan }: { user: any, plan: any }) {
   const [logs, setLogs]         = useState<DailyFoodLog[]>([]);
-  const [plan, setPlan]         = useState<Partial<WellnessPlan>>({});
   const [weekOffset, setWeekOffset] = useState(0);
 
   const weekStart = addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), weekOffset * 7);
   const weekEnd   = addDays(weekStart, 6);
   const weekLabel = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`;
 
-  useEffect(() => {
-    if (!user) return;
-    if (user.isMock) {
-      const raw = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
-      if (raw) setPlan(JSON.parse(raw));
-      return;
-    }
-    const load = async () => {
-      try {
-        const { doc, getDoc } = await import('firebase/firestore');
-        const snap = await getDoc(doc(db, 'wellnessPlans', user.uid));
-        if (snap.exists()) setPlan(snap.data() as WellnessPlan);
-      } catch {}
-    };
-    load();
-  }, [user]);
+
 
   useEffect(() => {
     if (!user) return;
@@ -160,8 +144,8 @@ export default function NutritionDashboard({ user }: { user: any }) {
               Nutrition Analytics
             </span>
           </div>
-          <h2 className="tsd-serif text-2xl font-bold text-[var(--tsd-forest-mid-text)]">Macro Performance</h2>
-          <p className="text-xs font-medium mt-1 text-[var(--tsd-forest-mid-text)] opacity-70">
+          <h2 className="tsd-serif text-2xl font-bold text-[var(--tsd-text)]">Macro Performance</h2>
+          <p className="text-xs font-medium mt-1 text-[var(--tsd-moss)]">
             Weekly breakdown vs targets
           </p>
         </div>

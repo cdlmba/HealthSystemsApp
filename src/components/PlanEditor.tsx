@@ -12,14 +12,14 @@ import { motion, AnimatePresence } from 'motion/react';
 const DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const TSD = {
-  forest:    '#013220',
-  forestMid: '#234f3b',
-  moss:      '#717973',
-  gold:      '#D4A017',
-  goldBg:    '#FFF9E6',
-  cream:     '#F8F4EF',
-  surface:   '#FDF9F4',
-  surfaceDim:'#EDE9E3',
+  forest:    'var(--tsd-forest)',
+  forestMid: 'var(--tsd-forest-mid)',
+  moss:      'var(--tsd-text-dim)',
+  gold:      'var(--tsd-gold)',
+  goldBg:    'var(--tsd-gold-bg)',
+  cream:     'var(--tsd-bg)',
+  surface:   'var(--tsd-surface)',
+  surfaceDim:'var(--tsd-surface-dim)',
 };
 
 const DEFAULT_PLAN: Omit<WellnessPlanType, 'id' | 'userId' | 'updatedAt'> = {
@@ -123,32 +123,18 @@ const inputStyle = {
   color: TSD.forest
 };
 
-export default function PlanEditor({ user }: { user: any }) {
-  const [plan, setPlan] = useState<Omit<WellnessPlanType, 'id' | 'userId' | 'updatedAt'>>(DEFAULT_PLAN);
+export default function PlanEditor({ user, plan: globalPlan }: { user: any, plan: any }) {
+  const [plan, setPlan] = useState<Omit<WellnessPlanType, 'id' | 'userId' | 'updatedAt'>>(
+    globalPlan ? { ...DEFAULT_PLAN, ...globalPlan } : DEFAULT_PLAN
+  );
   const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    const load = async () => {
-      if (user.isMock) {
-        const raw = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
-        if (raw) setPlan({ ...DEFAULT_PLAN, ...JSON.parse(raw) });
-        setLoading(false);
-        return;
-      }
-      try {
-        const snap = await getDoc(doc(db, 'wellnessPlans', user.uid));
-        if (snap.exists()) {
-          const data = snap.data() as WellnessPlanType;
-          const { id, userId, updatedAt, ...rest } = data;
-          setPlan({ ...DEFAULT_PLAN, ...rest });
-        }
-      } catch (e) { /* use defaults */ }
-      setLoading(false);
-    };
-    load();
-  }, [user]);
+    if (globalPlan) {
+      const { id, userId, updatedAt, ...rest } = globalPlan;
+      setPlan({ ...DEFAULT_PLAN, ...rest });
+    }
+  }, [globalPlan]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -157,13 +143,27 @@ export default function PlanEditor({ user }: { user: any }) {
       userId: user.uid,
       updatedAt: new Date().toISOString(),
     };
-    if (user.isMock) {
-      localStorage.setItem(`dean_tracker_wellness_plan_${user.uid}`, JSON.stringify(plan));
-    } else {
-      await setDoc(doc(db, 'wellnessPlans', user.uid), full, { merge: true });
+
+    // Strip undefined values (Firestore rejects them)
+    Object.keys(full).forEach(key => {
+      if ((full as any)[key] === undefined) {
+        delete (full as any)[key];
+      }
+    });
+
+    try {
+      if (user.isMock) {
+        localStorage.setItem(`dean_tracker_wellness_plan_${user.uid}`, JSON.stringify(plan));
+        window.dispatchEvent(new Event('planUpdated'));
+      } else {
+        await setDoc(doc(db, 'wellnessPlans', user.uid), full, { merge: true });
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e: any) {
+      console.error(e);
+      alert("Failed to save plan: " + e.message);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
   };
 
   const handleAutoEstimateBF = () => {
@@ -223,22 +223,16 @@ export default function PlanEditor({ user }: { user: any }) {
 
   const sleepDuration = calcSleepDuration(plan.targetBedtime, plan.targetWakeTime);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20 text-sm font-medium gap-2" style={{ color: TSD.moss }}>
-        Loading your protocol…
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full">
       {/* ── Header ─────────────────────────────────────────────── */}
       <div
         className="rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden"
-        style={{ background: TSD.forest }}
+        style={{ background: '#013220' }}
       >
-        <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl pointer-events-none" style={{ background: `${TSD.gold}18` }} />
+        <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(212, 160, 23, 0.15)' }} />
         <div className="relative z-10 text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
             <Settings2 className="w-3 h-3" style={{ color: TSD.gold }} />
@@ -256,7 +250,7 @@ export default function PlanEditor({ user }: { user: any }) {
           className="shrink-0 relative z-10 font-semibold uppercase tracking-wider text-xs h-10 px-5 gap-2 transition-all w-full sm:w-auto"
           style={{
             background: saved ? TSD.forestMid : TSD.gold,
-            color: saved ? '#fff' : '#795900',
+            color: saved ? 'var(--tsd-forest-text)' : '#795900',
             borderRadius: '10px'
           }}
         >

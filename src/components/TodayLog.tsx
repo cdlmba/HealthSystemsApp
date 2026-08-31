@@ -50,28 +50,14 @@ const METRIC_GROUPS = [
   }
 ];
 
-export default function TodayLog({ user }: { user: any }) {
+export default function TodayLog({ user, plan }: { user: any, plan: any }) {
   const [logs, setLogs] = useState<HealthLog[]>([]);
   const [foodLogs, setFoodLogs] = useState<DailyFoodLog[]>([]);
-  const [plan, setPlan] = useState<Partial<WellnessPlan>>({});
-  
   // Week view vs Day view state
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [mealModalDate, setMealModalDate] = useState<Date | null>(null);
-
-  // Load wellness plan
-  useEffect(() => {
-    if (!user) return;
-    const raw = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
-    if (raw) setPlan(JSON.parse(raw));
-    const interval = setInterval(() => {
-      const r = localStorage.getItem(`dean_tracker_wellness_plan_${user.uid}`);
-      if (r) setPlan(JSON.parse(r));
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [user]);
 
   // Load health logs
   useEffect(() => {
