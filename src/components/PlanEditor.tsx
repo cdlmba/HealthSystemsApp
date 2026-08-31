@@ -5,7 +5,7 @@ import { WellnessPlan as WellnessPlanType, DayOfWeek } from '../types';
 import { Button } from './ui/button';
 import {
   Moon, Dumbbell, UtensilsCrossed, Footprints, Save,
-  CheckCircle2, Clock, Target, Settings2, ChevronDown, ChevronUp
+  CheckCircle2, Clock, Target, Settings2, ChevronDown, ChevronUp, Calculator
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -173,6 +173,43 @@ export default function PlanEditor({ user }: { user: any }) {
     setField('estimatedBodyFat', Math.max(0, Math.round(estimatedBf * 10) / 10));
   };
 
+  const handleCalculateKeto = () => {
+    if (!plan.bodyWeightLbs || !plan.heightInches || !plan.age || !plan.gender || !plan.activityLevel || !plan.estimatedBodyFat) {
+      alert("Please ensure Weight, Height, Body Fat %, Age, Gender, and Activity Level are filled in.");
+      return;
+    }
+    
+    const weightKg = plan.bodyWeightLbs / 2.20462;
+    const heightCm = plan.heightInches * 2.54;
+    
+    let bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * plan.age);
+    bmr += (plan.gender === 'male' ? 5 : -161);
+    
+    const multipliers = {
+      sedentary: 1.2,
+      lightly_active: 1.35,
+      moderately_active: 1.55,
+      very_active: 1.75
+    };
+    const tdee = bmr * (multipliers[plan.activityLevel] || 1.2);
+    const lbmLbs = plan.bodyWeightLbs * (1 - (plan.estimatedBodyFat / 100));
+    
+    const protein = Math.round(lbmLbs * 0.8);
+    const carbs = 20;
+    
+    const deficitPct = (plan.deficit || 25) / 100;
+    const targetCalories = Math.round(tdee * (1 - deficitPct));
+    const fat = Math.round((targetCalories - (protein * 4) - (carbs * 4)) / 9);
+    
+    setPlan(prev => ({
+      ...prev,
+      targetCalories,
+      targetProtein: protein,
+      targetNetCarbs: carbs,
+      targetFat: fat
+    }));
+  };
+
   const setField = <K extends keyof typeof plan>(key: K, value: (typeof plan)[K]) => {
     setPlan(prev => ({ ...prev, [key]: value }));
   };
@@ -268,6 +305,16 @@ export default function PlanEditor({ user }: { user: any }) {
               placeholder="e.g. 195"
             />
           </Field>
+          <Field label="Goal Weight (Lbs)" hint="Target weight for tracking">
+            <input
+              type="number" step="0.1"
+              value={plan.targetWeightLbs || ''}
+              onChange={e => setField('targetWeightLbs', Number(e.target.value))}
+              className={`${inputClass}`}
+              style={inputStyle}
+              placeholder="e.g. 175"
+            />
+          </Field>
           <Field label="Height (Inches)" hint="Total height in inches">
             <input
               type="number" step="1"
@@ -299,6 +346,75 @@ export default function PlanEditor({ user }: { user: any }) {
               </Button>
             </div>
           </Field>
+        </div>
+      </Section>
+
+      {/* 🧮 Ankerl Keto Calculator */}
+      <Section title="Ankerl Keto Calculator" icon={Calculator} defaultOpen={false}>
+        <div className="flex flex-col gap-4 pt-2">
+          <p className="text-xs text-[var(--tsd-moss)]">
+            Automatically calculate your macro targets using the Ankerl methodology (Mifflin-St. Jeor equation & Lean Body Mass targeting). Requires Baseline Weight, Height, and Body Fat % from above.
+          </p>
+          <div className="grid sm:grid-cols-4 gap-6">
+            <Field label="Age" hint="Years">
+              <input
+                type="number" min={0}
+                value={plan.age || ''}
+                onChange={e => setField('age', Number(e.target.value))}
+                className={`${inputClass}`}
+                style={inputStyle}
+                placeholder="e.g. 43"
+              />
+            </Field>
+            <Field label="Gender">
+              <select
+                value={plan.gender || ''}
+                onChange={e => setField('gender', e.target.value as any)}
+                className={`${inputClass}`}
+                style={inputStyle}
+              >
+                <option value="" disabled>Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </Field>
+            <Field label="Activity Level">
+              <select
+                value={plan.activityLevel || ''}
+                onChange={e => setField('activityLevel', e.target.value as any)}
+                className={`${inputClass}`}
+                style={inputStyle}
+              >
+                <option value="" disabled>Select...</option>
+                <option value="sedentary">Sedentary</option>
+                <option value="lightly_active">Lightly Active</option>
+                <option value="moderately_active">Moderately Active</option>
+                <option value="very_active">Very Active</option>
+              </select>
+            </Field>
+            <Field label="Caloric Deficit %" hint="Default is 25%">
+              <div className="flex items-center gap-3">
+                <input
+                  type="number" min={0} max={100}
+                  value={plan.deficit === undefined ? 25 : plan.deficit}
+                  onChange={e => setField('deficit', Number(e.target.value))}
+                  className="w-full h-10 px-3 text-sm rounded-lg focus:outline-none focus:ring-2 transition text-center font-bold"
+                  style={inputStyle}
+                />
+                <span className="text-xs font-medium" style={{ color: TSD.moss }}>%</span>
+              </div>
+            </Field>
+          </div>
+          <div className="mt-2">
+            <Button
+              onClick={handleCalculateKeto}
+              className="w-full sm:w-auto px-6 h-12 font-bold uppercase tracking-widest text-xs rounded-xl"
+              style={{ background: 'var(--tsd-forest)', color: 'var(--tsd-forest-text)' }}
+            >
+              <Calculator className="w-4 h-4 mr-2" />
+              Calculate & Apply Macros
+            </Button>
+          </div>
         </div>
       </Section>
 

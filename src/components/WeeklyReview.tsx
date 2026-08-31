@@ -15,7 +15,8 @@ import {
   CartesianGrid,
   Legend,
   LineChart,
-  Line
+  Line,
+  ReferenceLine
 } from 'recharts';
 import {
   Activity,
@@ -108,7 +109,7 @@ export default function WeeklyReview({ user }: { user: any }) {
     } as any, plan);
   }
 
-  // Compile trend data for charts
+  // Compile daily trend data for charts (e.g. Calories)
   const trendData = Array.from({ length: 7 }).map((_, i) => {
     const date = addDays(currentWeekStart, i);
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -116,11 +117,38 @@ export default function WeeklyReview({ user }: { user: any }) {
     
     return {
       name: format(date, 'EEE'),
-      'Weight': log?.morningWeightLbs || avgWeight,
       'Calories': log?.caloriesLogged || 0,
       'Steps': log?.steps || 0
     };
   });
+
+  // Compile long-term weekly trend data for Weight
+  const weeklyAverages = React.useMemo(() => {
+    if (!logs.length) return [];
+    
+    const groups: Record<string, number[]> = {};
+    logs.forEach(log => {
+      const w = (log as any).morningWeightLbs || log.weight || log.morningWeight;
+      if (!w) return;
+      
+      const d = parseISO(log.date);
+      const start = startOfWeek(d, { weekStartsOn: 1 });
+      const key = format(start, 'yyyy-MM-dd');
+      
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(w);
+    });
+    
+    const sortedKeys = Object.keys(groups).sort();
+    return sortedKeys.map(key => {
+      const vals = groups[key];
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      return {
+        name: format(parseISO(key), 'MMM d'),
+        Weight: Number(avg.toFixed(1))
+      };
+    });
+  }, [logs]);
 
   if (!plan) return <div className="p-8 text-center text-slate-500">Loading plan...</div>;
 
@@ -269,12 +297,14 @@ export default function WeeklyReview({ user }: { user: any }) {
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <LineChart data={weeklyAverages} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} dy={10} />
-                <YAxis domain={['dataMin - 1', 'dataMax + 1']} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                <YAxis domain={['dataMin - 5', 'dataMax + 5']} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
                 <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }} />
                 <Line type="monotone" dataKey="Weight" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                {plan?.bodyWeightLbs && <ReferenceLine y={plan.bodyWeightLbs} stroke="var(--tsd-gold)" strokeDasharray="3 3" />}
+                {plan?.targetWeightLbs && <ReferenceLine y={plan.targetWeightLbs} stroke="var(--tsd-forest-mid)" strokeDasharray="3 3" />}
               </LineChart>
             </ResponsiveContainer>
           </div>

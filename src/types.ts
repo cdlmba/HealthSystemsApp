@@ -164,9 +164,15 @@ export interface WellnessPlan {
   // Dean Tracker Fields
   phase?: 'cut' | 'bulk' | 'maintain';
   weeklyRateTarget?: number; // % body weight/week
-  heightInches?: number;
-  estimatedBodyFat?: number; // %
-  bodyWeightLbs?: number; // current body weight at plan creation
+  heightInches: number;
+  estimatedBodyFat: number;
+  bodyWeightLbs: number;
+  targetWeightLbs?: number;
+  age?: number;
+  gender?: 'male' | 'female';
+  activityLevel?: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active';
+  deficit?: number;
+
   trainingDaysPerWeek?: number; // alias to targetGymDaysPerWeek
   zone2DaysPerWeek?: number;
   restTimerSeconds?: number;
