@@ -144,9 +144,10 @@ export default function PlanEditor({ user, plan: globalPlan }: { user: any, plan
       updatedAt: new Date().toISOString(),
     };
 
-    // Strip undefined values (Firestore rejects them)
+    // Strip undefined, null, empty strings, and NaN values (Firestore schema validation rejects them)
     Object.keys(full).forEach(key => {
-      if ((full as any)[key] === undefined) {
+      const val = (full as any)[key];
+      if (val === undefined || val === null || val === '' || Number.isNaN(val)) {
         delete (full as any)[key];
       }
     });

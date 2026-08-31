@@ -108,7 +108,13 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
     const dateStr = format(date, 'yyyy-MM-dd');
     const existingLog = getLogForDay(date);
     const docId = existingLog?.id || `${user.uid}_${dateStr}`;
-    const updatedData = { ...existingLog, [field]: value, date: dateStr, userId: user.uid };
+    const updatedData = { 
+      notes: null,
+      ...existingLog, 
+      [field]: value, 
+      date: dateStr, 
+      userId: user.uid 
+    };
 
     if (user.isMock) {
       const storageKey = `dean_tracker_logs_v2_${user.uid}`;
@@ -279,9 +285,38 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
                   );
                 }
 
+                if (metric.id === 'stressLevel' || metric.id === 'sleepQuality') {
+                  const maxVal = metric.id === 'stressLevel' ? 5 : 10;
+                  const options = Array.from({ length: maxVal }, (_, i) => i + 1);
+                  return (
+                    <div key={metric.id} className="flex flex-col gap-2 mt-1">
+                      <label className="text-xs font-bold text-[var(--tsd-text)]">{metric.label}</label>
+                      <div className="flex gap-2 items-center overflow-x-auto pb-2 -mx-1 px-1 snap-x">
+                        {options.map(opt => (
+                          <button
+                            key={opt}
+                            className={`rir-btn shrink-0 w-12 h-12 snap-center ${val === opt ? 'selected' : ''}`}
+                            onClick={() => updateLog(selectedDate, metric.id, opt)}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          className="rir-btn shrink-0 w-16 h-12 text-center bg-[var(--tsd-surface-2)] text-sm font-bold snap-center"
+                          placeholder="+"
+                          value={(val !== undefined && val !== null && !options.includes(val)) ? val : ''}
+                          onChange={e => updateLog(selectedDate, metric.id, e.target.value === '' ? null : Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
                 // Default Number Input
                 return (
-                  <div key={metric.id} className="flex flex-col gap-1.5">
+                  <div key={metric.id} className="flex flex-col gap-1.5 mt-1">
                     <label className="text-xs font-bold text-[var(--tsd-text)]">{metric.label}</label>
                     <input
                       type="number"

@@ -33,7 +33,7 @@ service cloud.firestore {
       return data.userId == request.auth.uid &&
              data.date is string &&
              data.date.size() <= 64 &&
-             (data.notes == null || (data.notes is string && data.notes.size() <= 5000));
+             (!('notes' in data) || data.notes == null || (data.notes is string && data.notes.size() <= 5000));
     }
 
     // Rules for Health Logs
