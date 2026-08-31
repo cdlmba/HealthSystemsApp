@@ -140,15 +140,31 @@ export default function WeeklyReview({ user }: { user: any }) {
     });
     
     const sortedKeys = Object.keys(groups).sort();
+    if (sortedKeys.length === 0) return [];
+    
+    const firstWeekDate = parseISO(sortedKeys[0]);
+
     return sortedKeys.map(key => {
       const vals = groups[key];
       const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      
+      let projected = undefined;
+      if (plan?.bodyWeightLbs && plan?.weeklyRateTarget && plan?.phase) {
+        const currentWeekDate = parseISO(key);
+        const weeksDiff = Math.round((currentWeekDate.getTime() - firstWeekDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+        
+        const rateLbs = plan.bodyWeightLbs * (plan.weeklyRateTarget / 100);
+        const direction = plan.phase === 'bulk' ? 1 : (plan.phase === 'cut' ? -1 : 0);
+        projected = plan.bodyWeightLbs + (direction * rateLbs * weeksDiff);
+      }
+
       return {
         name: format(parseISO(key), 'MMM d'),
-        Weight: Number(avg.toFixed(1))
+        Weight: Number(avg.toFixed(1)),
+        Projected: projected ? Number(projected.toFixed(1)) : undefined
       };
     });
-  }, [logs]);
+  }, [logs, plan]);
 
   if (!plan) return <div className="p-8 text-center text-slate-500">Loading plan...</div>;
 
@@ -302,7 +318,8 @@ export default function WeeklyReview({ user }: { user: any }) {
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} dy={10} />
                 <YAxis domain={['dataMin - 5', 'dataMax + 5']} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
                 <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }} />
-                <Line type="monotone" dataKey="Weight" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Weight" name="Actual" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Projected" name="Projected" stroke="#94a3b8" strokeDasharray="4 4" strokeWidth={2} dot={false} />
                 {plan?.bodyWeightLbs && <ReferenceLine y={plan.bodyWeightLbs} stroke="var(--tsd-gold)" strokeDasharray="3 3" />}
                 {plan?.targetWeightLbs && <ReferenceLine y={plan.targetWeightLbs} stroke="var(--tsd-forest-mid)" strokeDasharray="3 3" />}
               </LineChart>
