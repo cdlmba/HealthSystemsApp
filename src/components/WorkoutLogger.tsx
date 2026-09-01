@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { WorkoutSession, WorkoutSet, Exercise } from '../types';
 import { format, parseISO } from 'date-fns';
+import { WorkoutSessionSchema } from '../lib/schemas';
+import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { Dumbbell, Plus, Save, Trash2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -117,51 +119,65 @@ export default function WorkoutLogger({ user, plan }: { user: any, plan: any }) 
     if (!session || !user) return;
     
     const sessionToSave = { ...session, templateName };
-    const uniqueExercises = Array.from(new Set(sessionToSave.sets.map(s => s.exerciseName)));
-    
-    if (user.isMock) {
-      localStorage.setItem(`dean_tracker_workout_${user.uid}_${date}`, JSON.stringify(sessionToSave));
-      
-      let list: Exercise[] = JSON.parse(localStorage.getItem(`dean_tracker_exercises_${user.uid}`) || '[]');
-      let listChanged = false;
-      for (const exName of uniqueExercises) {
-        if (!list.find(e => e.name.toLowerCase() === exName.toLowerCase())) {
-          list.push({
-            id: `ex_${Date.now()}`,
-            userId: user.uid,
-            name: exName,
-            category: 'push',
-            defaultRepRange: [8, 12],
-            targetRIR: 2
-          });
-          listChanged = true;
-        }
-      }
-      if (listChanged) {
-        localStorage.setItem(`dean_tracker_exercises_${user.uid}`, JSON.stringify(list));
-        setSavedExercises(list);
-      }
-    } else {
-      const docRef = session.id ? doc(db, 'workoutSessions', session.id) : doc(collection(db, 'workoutSessions'));
-      await setDoc(docRef, sessionToSave, { merge: true });
-      if (!session.id) setSession({ ...sessionToSave, id: docRef.id });
-      
-      for (const exName of uniqueExercises) {
-        if (!savedExercises.find(e => e.name.toLowerCase() === exName.toLowerCase())) {
-          const newEx: Exercise = {
-            userId: user.uid,
-            name: exName,
-            category: 'push',
-            defaultRepRange: [8, 12],
-            targetRIR: 2
-          };
-          setDoc(doc(collection(db, 'exercises')), newEx);
-        }
-      }
+
+    try {
+      // Validate the session data
+      WorkoutSessionSchema.parse(sessionToSave);
+    } catch (error: any) {
+      toast.error('Validation failed: ' + error.message);
+      return;
     }
+
+    const uniqueExercises: string[] = Array.from(new Set(sessionToSave.sets.map(s => s.exerciseName)));
     
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      if (user.isMock) {
+        localStorage.setItem(`dean_tracker_workout_${user.uid}_${date}`, JSON.stringify(sessionToSave));
+        
+        let list: Exercise[] = JSON.parse(localStorage.getItem(`dean_tracker_exercises_${user.uid}`) || '[]');
+        let listChanged = false;
+        for (const exName of uniqueExercises) {
+          if (!list.find(e => e.name.toLowerCase() === exName.toLowerCase())) {
+            list.push({
+              id: `ex_${Date.now()}`,
+              userId: user.uid,
+              name: exName,
+              category: 'push',
+              defaultRepRange: [8, 12],
+              targetRIR: 2
+            });
+            listChanged = true;
+          }
+        }
+        if (listChanged) {
+          localStorage.setItem(`dean_tracker_exercises_${user.uid}`, JSON.stringify(list));
+          setSavedExercises(list);
+        }
+      } else {
+        const docRef = session.id ? doc(db, 'workoutSessions', session.id) : doc(collection(db, 'workoutSessions'));
+        await setDoc(docRef, sessionToSave, { merge: true });
+        if (!session.id) setSession({ ...sessionToSave, id: docRef.id });
+        
+        for (const exName of uniqueExercises) {
+          if (!savedExercises.find(e => e.name.toLowerCase() === exName.toLowerCase())) {
+            const newEx: Exercise = {
+              userId: user.uid,
+              name: exName,
+              category: 'push',
+              defaultRepRange: [8, 12],
+              targetRIR: 2
+            };
+            setDoc(doc(collection(db, 'exercises')), newEx);
+          }
+        }
+      }
+      
+      setSaved(true);
+      toast.success('Workout saved successfully!');
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error: any) {
+      toast.error('Failed to save workout: ' + error.message);
+    }
   };
 
   const groupedSets = session?.sets.reduce((acc, set, idx) => {

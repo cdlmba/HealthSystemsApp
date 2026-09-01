@@ -50,7 +50,10 @@ export interface DailyLog {
   waterOz?: number; // ounces
   morningWeight?: number; // alias to weight
   workoutSessionId?: string; // FK to workoutSessions
+  workoutSessionName?: string;
   zone2Minutes?: number; // cardio minutes
+  zone2Cardio?: number;
+  steps?: number;
 }
 
 export type HealthLog = DailyLog;

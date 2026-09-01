@@ -3,6 +3,8 @@ import { collection, query, where, onSnapshot, doc, setDoc } from 'firebase/fire
 import { db } from '../lib/firebase';
 import { HealthLog, DailyFoodLog, WellnessPlan } from '../types';
 import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
+import { HealthLogSchema } from '../lib/schemas';
+import { toast } from 'sonner';
 import { Checkbox } from './ui/checkbox';
 import { UtensilsCrossed, ChevronLeft, ChevronRight, LayoutGrid, Calendar1, Flame, Droplets, Beef, Wheat } from 'lucide-react';
 import MealLogModal from './MealLogModal';
@@ -116,6 +118,13 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
       userId: user.uid 
     };
 
+    try {
+      HealthLogSchema.parse(updatedData);
+    } catch (error: any) {
+      toast.error('Validation failed: ' + error.message);
+      return;
+    }
+
     if (user.isMock) {
       const storageKey = `dean_tracker_logs_v2_${user.uid}`;
       const savedLogs = localStorage.getItem(storageKey);
@@ -130,7 +139,12 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
       setLogs(list);
       return;
     }
-    await setDoc(doc(db, 'healthLogs', docId), updatedData, { merge: true });
+    try {
+      await setDoc(doc(db, 'healthLogs', docId), updatedData, { merge: true });
+      toast.success('Log updated');
+    } catch (error: any) {
+      toast.error('Failed to update log: ' + error.message);
+    }
   };
 
   const saveFoodLog = (foodLog: DailyFoodLog) => {
