@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DailyLog, WellnessPlan, WeeklyRecommendation } from '../types';
@@ -27,15 +27,24 @@ import {
   Target,
   ArrowRight,
   TrendingUp,
+  TrendingDown,
+  Minus,
   AlertTriangle,
   Flame,
   Footprints,
-  CalendarDays
+  CalendarDays,
+  Sparkles,
+  Loader2,
+  Printer
 } from 'lucide-react';
+import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 export default function WeeklyReview({ user, plan }: { user: any, plan: WellnessPlan | null }) {
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [currentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -96,6 +105,79 @@ export default function WeeklyReview({ user, plan }: { user: any, plan: Wellness
       avgStressLevel: 0
     } as any, plan);
   }
+
+  // 2A: AI Weekly Brief generator
+  const generateAISummary = async () => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
+      toast.error('No Gemini API key configured.');
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const prompt = `You are a precision health coach. Generate a concise, direct 3-paragraph weekly brief for this athlete.
+
+Week of: ${format(currentWeekStart, 'MMM d, yyyy')}
+
+KEY METRICS:
+- Avg Weight: ${avgWeight.toFixed(1)} lbs (target: ${plan?.bodyWeightLbs} lbs, goal: ${plan?.targetWeightLbs} lbs, phase: ${plan?.phase})
+- Avg Calories: ${Math.round(avgCalories)} kcal (target: ${plan?.targetCalories} kcal)
+- Avg Protein: ${Math.round(avgProtein)}g (target: ${plan?.targetProtein}g)
+- Avg Steps: ${Math.round(avgSteps)} (target: ${plan?.targetSteps})
+- Training Sessions: ${gymSessionsCount}/${plan?.targetGymDaysPerWeek}
+- Avg Sleep Quality: ${avgSleep.toFixed(1)}/10
+
+Algorithmic recommendation: ${recommendation?.rationale}
+
+Paragraph 1: What went well this week (be specific, reference actual numbers).
+Paragraph 2: The key constraint or weakness that limited results.
+Paragraph 3: The single highest-priority action for the next 7 days. Be direct, tactical, no corporate speak.`;
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 400, temperature: 0.3 }
+          })
+        }
+      );
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) setAiSummary(text);
+      else toast.error('No response from AI.');
+    } catch (err: any) {
+      toast.error('AI summary failed: ' + err.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // 2C: Weight trend intelligence
+  const weightTrend = useMemo(() => {
+    const sorted = logs
+      .filter(l => l.morningWeight)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    if (sorted.length < 2) return null;
+    const recent = sorted.slice(-7);
+    const older = sorted.slice(-14, -7);
+    if (!older.length) return null;
+    const recentAvg = recent.reduce((s, l) => s + (l.morningWeight || 0), 0) / recent.length;
+    const olderAvg = older.reduce((s, l) => s + (l.morningWeight || 0), 0) / older.length;
+    const delta = recentAvg - olderAvg;
+    const targetRate = plan?.weeklyRateTarget || 0;
+    const phase = plan?.phase || 'maintain';
+    let status: 'on-track' | 'fast' | 'slow' | 'plateau' = 'on-track';
+    if (Math.abs(delta) < 0.2) status = 'plateau';
+    else if (phase === 'cut' && delta < targetRate - 0.5) status = 'fast';
+    else if (phase === 'cut' && delta > targetRate + 0.3) status = 'slow';
+    else if (phase === 'bulk' && delta > targetRate + 0.5) status = 'fast';
+    else if (phase === 'bulk' && delta < targetRate - 0.3) status = 'slow';
+    return { delta, status };
+  }, [logs, plan]);
 
   // Compile daily trend data for charts (e.g. Calories)
   const trendData = Array.from({ length: 7 }).map((_, i) => {
@@ -174,7 +256,14 @@ export default function WeeklyReview({ user, plan }: { user: any, plan: Wellness
   if (!plan) return <div className="p-8 text-center text-slate-500">Loading plan...</div>;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" id="weekly-review-report">
+      <div className="flex justify-end mb-2 no-print">
+        <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 text-xs font-bold border-2 border-[var(--tsd-surface-dim)]">
+          <Printer className="w-4 h-4" />
+          Export PDF Report
+        </Button>
+      </div>
+
       {/* Dynamic Header Block with Recommendation */}
       <div className="rounded-xl p-6 flex flex-col md:flex-row justify-between gap-6 shadow-lg relative overflow-hidden" style={{ background: 'var(--tsd-forest)', border: '1px solid var(--tsd-forest-mid)' }}>
         <div className="absolute -right-16 -top-16 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -241,6 +330,24 @@ export default function WeeklyReview({ user, plan }: { user: any, plan: Wellness
                 <span className="text-2xl font-bold text-slate-800 tracking-tight">{avgWeight.toFixed(1)}</span>
                 <span className="text-xs text-slate-400 font-semibold">lbs</span>
               </div>
+              {/* 2C: Trend Intelligence Badge */}
+              {weightTrend && (
+                <div className={`mt-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  weightTrend.status === 'on-track' ? 'bg-emerald-100 text-emerald-800' :
+                  weightTrend.status === 'fast' ? 'bg-amber-100 text-amber-800' :
+                  weightTrend.status === 'slow' ? 'bg-rose-100 text-rose-800' :
+                  'bg-slate-100 text-slate-600'
+                }`}>
+                  {weightTrend.status === 'on-track' && <TrendingUp className="w-3 h-3" />}
+                  {weightTrend.status === 'fast' && <TrendingDown className="w-3 h-3" />}
+                  {weightTrend.status === 'slow' && <TrendingUp className="w-3 h-3" />}
+                  {weightTrend.status === 'plateau' && <Minus className="w-3 h-3" />}
+                  {weightTrend.delta > 0 ? '+' : ''}{weightTrend.delta.toFixed(1)} lbs &bull;
+                  {weightTrend.status === 'on-track' ? ' On Track' :
+                   weightTrend.status === 'fast' ? ' Moving Fast' :
+                   weightTrend.status === 'slow' ? ' Behind Pace' : ' Plateau'}
+                </div>
+              )}
               <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 text-[10px]">
                 <span className="font-bold text-slate-400 uppercase tracking-widest">Rate</span>
                 <span className="font-bold text-slate-700">{currentRate > 0 ? '+' : ''}{currentRate.toFixed(2)} lbs</span>
@@ -333,6 +440,78 @@ export default function WeeklyReview({ user, plan }: { user: any, plan: Wellness
           </div>
         </div>
       )}
+
+      {/* MarginReset Heat Map */}
+      <div className="geometric-card p-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-[10px] font-bold text-[var(--tsd-forest)] uppercase tracking-widest">MarginReset Heat Map</h3>
+          <span className="text-[10px] text-[var(--tsd-text-dim)] uppercase tracking-widest font-bold">Ghost Dad Framework</span>
+        </div>
+        <div className="grid grid-cols-8 gap-2 w-full text-center text-[10px] font-bold uppercase tracking-widest text-[var(--tsd-text-dim)]">
+          <div className="text-left flex items-end">Pillar</div>
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="flex justify-center items-end pb-1">{format(addDays(currentWeekStart, i), 'EEE')}</div>
+          ))}
+          
+          <div className="text-left text-xs font-semibold text-[var(--tsd-text)] mt-2">Spiritual</div>
+          {Array.from({ length: 7 }).map((_, i) => {
+            const dateStr = format(addDays(currentWeekStart, i), 'yyyy-MM-dd');
+            const log = weekLogs.find(l => l.date === dateStr);
+            const active = log?.spiritualRhythm;
+            return (
+              <div key={i} className={`mt-2 rounded-sm aspect-square ${active ? 'bg-[var(--tsd-forest)]' : 'bg-[var(--tsd-surface-dim)] opacity-30'}`} />
+            );
+          })}
+
+          <div className="text-left text-xs font-semibold text-[var(--tsd-text)] mt-2">Writing</div>
+          {Array.from({ length: 7 }).map((_, i) => {
+            const dateStr = format(addDays(currentWeekStart, i), 'yyyy-MM-dd');
+            const log = weekLogs.find(l => l.date === dateStr);
+            const active = log?.writingOutput && log.writingOutput > 0;
+            return (
+              <div key={i} className={`mt-2 rounded-sm aspect-square ${active ? 'bg-[var(--tsd-gold)]' : 'bg-[var(--tsd-surface-dim)] opacity-30'}`} />
+            );
+          })}
+
+          <div className="text-left text-xs font-semibold text-[var(--tsd-text)] mt-2">Finances</div>
+          {Array.from({ length: 7 }).map((_, i) => {
+            const dateStr = format(addDays(currentWeekStart, i), 'yyyy-MM-dd');
+            const log = weekLogs.find(l => l.date === dateStr);
+            const active = log?.finances801010;
+            return (
+              <div key={i} className={`mt-2 rounded-sm aspect-square ${active ? 'bg-[var(--tsd-moss)]' : 'bg-[var(--tsd-surface-dim)] opacity-30'}`} />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2A: AI Weekly Brief */}
+      <div className="geometric-card p-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[var(--tsd-gold)]" />
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AI Weekly Brief</h3>
+          </div>
+          <Button
+            onClick={generateAISummary}
+            disabled={aiLoading}
+            size="sm"
+            className="h-8 text-xs gap-1.5 bg-[var(--tsd-forest)] text-[var(--tsd-forest-text)] hover:bg-[var(--tsd-forest)]/90"
+          >
+            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {aiSummary ? 'Regenerate' : 'Generate Brief'}
+          </Button>
+        </div>
+        {aiSummary ? (
+          <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap border-l-2 border-[var(--tsd-gold)] pl-4">
+            {aiSummary}
+          </div>
+        ) : (
+          <div className="text-sm text-slate-400 italic py-4 text-center">
+            Click "Generate Brief" for an AI-powered narrative summary of your week.
+          </div>
+        )}
+      </div>
 
       {/* Trends */}
       <div className="grid gap-6 lg:grid-cols-2">

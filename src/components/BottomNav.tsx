@@ -1,11 +1,12 @@
 import React from 'react';
-import { CalendarCheck, UtensilsCrossed, Dumbbell, BarChart3, Settings2 } from 'lucide-react';
+import { CalendarCheck, UtensilsCrossed, Dumbbell, BarChart3, Settings2, Sparkles } from 'lucide-react';
 
 const TABS = [
   { value: 'today',   icon: CalendarCheck,   label: 'Today'   },
   { value: 'food',    icon: UtensilsCrossed,  label: 'Food'    },
   { value: 'workout', icon: Dumbbell,         label: 'Workout' },
   { value: 'weekly',  icon: BarChart3,        label: 'Weekly'  },
+  { value: 'coach',   icon: Sparkles,         label: 'Coach'   },
   { value: 'plan',    icon: Settings2,        label: 'Plan'    },
 ];
 

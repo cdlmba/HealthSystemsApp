@@ -6,8 +6,9 @@ import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
 import { HealthLogSchema } from '../lib/schemas';
 import { toast } from 'sonner';
 import { Checkbox } from './ui/checkbox';
-import { UtensilsCrossed, ChevronLeft, ChevronRight, LayoutGrid, Calendar1, Flame, Droplets, Beef, Wheat } from 'lucide-react';
+import { UtensilsCrossed, ChevronLeft, ChevronRight, LayoutGrid, Calendar1, Flame, Droplets, Beef, Wheat, Sun, Moon } from 'lucide-react';
 import MealLogModal from './MealLogModal';
+import QuickLogModal from './QuickLogModal';
 import { motion, AnimatePresence } from 'motion/react';
 
 const METRIC_GROUPS = [
@@ -49,6 +50,17 @@ const METRIC_GROUPS = [
       { id: 'gymCompleted', label: 'Workout Completed', type: 'boolean', aggregation: 'sum', target: '3-4/wk' },
       { id: 'workoutSessionId', label: 'Session Logged', type: 'boolean', aggregation: 'sum', target: 'Tracked' },
     ]
+  },
+  {
+    category: 'MarginReset (Ghost Dad)',
+    metrics: [
+      { id: 'homeBy515', label: 'Home by 5:15', type: 'boolean', aggregation: 'sum', target: 'Daily' },
+      { id: 'eatingWindowAdherence', label: '14/10 Window', type: 'boolean', aggregation: 'sum', target: 'Daily' },
+      { id: 'spiritualRhythm', label: 'Spiritual Rhythm', type: 'boolean', aggregation: 'sum', target: 'Daily' },
+      { id: 'finances801010', label: '80/10/10 Budget', type: 'boolean', aggregation: 'sum', target: 'Daily' },
+      { id: 'writingOutput', label: 'Writing Output (words)', type: 'number', aggregation: 'sum', target: '2500/wk' },
+      { id: 'dailyCalls', label: 'Relational Calls', type: 'number', aggregation: 'sum', target: 'Daily' },
+    ]
   }
 ];
 
@@ -60,6 +72,7 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [mealModalDate, setMealModalDate] = useState<Date | null>(null);
+  const [quickLogMode, setQuickLogMode] = useState<'morning' | 'evening' | null>(null);
 
   // Load health logs
   useEffect(() => {
@@ -194,8 +207,55 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
     const dayKey = DAY_KEYS[selectedDate.getDay() === 0 ? 6 : selectedDate.getDay() - 1];
     const plannedWorkout = plan.workoutSplit?.[dayKey];
 
+    // Compute eating window countdown
+    let eatingWindowCountdown = null;
+    if (plan.eatingWindowEnd && isSameDay(selectedDate, new Date())) {
+      const now = new Date();
+      const [endHour, endMin] = plan.eatingWindowEnd.split(':').map(Number);
+      const endTime = new Date();
+      endTime.setHours(endHour, endMin, 0, 0);
+      
+      const diffMs = endTime.getTime() - now.getTime();
+      if (diffMs > 0 && diffMs < 14 * 60 * 60 * 1000) { // arbitrary threshold to only show when window is open
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        eatingWindowCountdown = `${hours}h ${mins}m remaining`;
+      } else if (diffMs <= 0) {
+        eatingWindowCountdown = 'Window Closed (Fasting)';
+      }
+    }
+
     return (
       <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+
+        {/* Eating Window Countdown */}
+        {eatingWindowCountdown && (
+          <div className="flex items-center justify-between p-3 rounded-xl border-2 border-[var(--tsd-gold)] bg-[var(--tsd-gold-bg)]">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tsd-gold)] flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--tsd-gold)] animate-pulse" />
+              Eating Window
+            </span>
+            <span className="text-sm font-black text-[#795900]">{eatingWindowCountdown}</span>
+          </div>
+        )}
+
+        {/* Quick Log Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setQuickLogMode('morning')}
+            className="flex items-center justify-center gap-2 h-10 rounded-xl bg-[var(--tsd-surface-dim)] hover:bg-[rgba(74,222,128,0.1)] hover:border-[var(--tsd-forest)] border-2 border-transparent transition-all text-xs font-bold text-[var(--tsd-text)]"
+          >
+            <Sun className="w-3.5 h-3.5 text-[var(--tsd-gold)]" />
+            Morning Log
+          </button>
+          <button
+            onClick={() => setQuickLogMode('evening')}
+            className="flex items-center justify-center gap-2 h-10 rounded-xl bg-[var(--tsd-surface-dim)] hover:bg-[rgba(74,222,128,0.1)] hover:border-[var(--tsd-forest)] border-2 border-transparent transition-all text-xs font-bold text-[var(--tsd-text)]"
+          >
+            <Moon className="w-3.5 h-3.5 text-[var(--tsd-moss)]" />
+            Evening Log
+          </button>
+        </div>
         
         {/* Date Strip */}
         <div className="flex items-center justify-between overflow-x-auto pb-2 -mx-4 px-4 sticky top-0 z-20 bg-[var(--tsd-bg)] border-b border-[var(--tsd-surface-dim)] pt-2">
@@ -237,23 +297,45 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
                     // special card for food log button
                     const macros = foodLog?.totals || { calories: 0, protein: 0, fat: 0, netCarbs: 0 };
                     return (
-                      <div key={metric.id} className="bg-[var(--tsd-surface)] rounded-xl border border-[var(--tsd-surface-dim)] p-4 flex flex-col gap-3 mt-2">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs font-bold uppercase tracking-widest text-[var(--tsd-text-dim)]">Meals</span>
-                          <span className="text-xl font-black">{macros.calories} <span className="text-xs font-bold text-[var(--tsd-text-dim)]">kcal</span></span>
+                      <div key={metric.id} className="bg-[var(--tsd-surface)] rounded-xl border border-[var(--tsd-surface-dim)] p-4 flex flex-col gap-4 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold uppercase tracking-widest text-[var(--tsd-text-dim)]">Nutrition Progress</span>
+                          <span className="text-xl font-black">{macros.calories} <span className="text-xs font-bold text-[var(--tsd-text-dim)]">/ {plan.targetCalories || 2000} kcal</span></span>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="text-center bg-[var(--tsd-bg)] p-2 rounded-lg border border-[var(--tsd-surface-dim)]">
-                            <span className="block text-sm font-black text-[var(--tsd-forest)]">{macros.protein}g</span>
-                            <span className="block text-[9px] font-bold uppercase text-[var(--tsd-text-dim)]">Protein</span>
+                        
+                        <div className="w-full bg-[var(--tsd-surface-dim)] h-2 rounded-full overflow-hidden -mt-2 mb-2">
+                          <div className="h-full bg-rose-500 transition-all" style={{ width: `${Math.min(100, (macros.calories / (plan.targetCalories || 2000)) * 100)}%` }} />
+                        </div>
+
+                        <div className="grid gap-3">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                              <span className="text-[var(--tsd-forest)]">Protein</span>
+                              <span className="text-[var(--tsd-text-dim)]">{macros.protein} / {plan.targetProtein || 150}g</span>
+                            </div>
+                            <div className="w-full bg-[var(--tsd-surface-dim)] h-1.5 rounded-full overflow-hidden">
+                              <div className="h-full bg-[var(--tsd-forest)] transition-all" style={{ width: `${Math.min(100, (macros.protein / (plan.targetProtein || 150)) * 100)}%` }} />
+                            </div>
                           </div>
-                          <div className="text-center bg-[var(--tsd-bg)] p-2 rounded-lg border border-[var(--tsd-surface-dim)]">
-                            <span className="block text-sm font-black text-[var(--tsd-gold)]">{macros.fat}g</span>
-                            <span className="block text-[9px] font-bold uppercase text-[var(--tsd-text-dim)]">Fat</span>
+                          
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                              <span className="text-[var(--tsd-gold)]">Fat</span>
+                              <span className="text-[var(--tsd-text-dim)]">{macros.fat} / {plan.targetFat || 70}g</span>
+                            </div>
+                            <div className="w-full bg-[var(--tsd-surface-dim)] h-1.5 rounded-full overflow-hidden">
+                              <div className="h-full bg-[var(--tsd-gold)] transition-all" style={{ width: `${Math.min(100, (macros.fat / (plan.targetFat || 70)) * 100)}%` }} />
+                            </div>
                           </div>
-                          <div className="text-center bg-[var(--tsd-bg)] p-2 rounded-lg border border-[var(--tsd-surface-dim)]">
-                            <span className="block text-sm font-black text-[var(--tsd-gold-light)]">{macros.netCarbs}g</span>
-                            <span className="block text-[9px] font-bold uppercase text-[var(--tsd-text-dim)]">Carbs</span>
+                          
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                              <span className="text-[#84cc16]">Net Carbs</span>
+                              <span className="text-[var(--tsd-text-dim)]">{macros.netCarbs} / {plan.targetNetCarbs || 100}g</span>
+                            </div>
+                            <div className="w-full bg-[var(--tsd-surface-dim)] h-1.5 rounded-full overflow-hidden">
+                              <div className="h-full bg-[#84cc16] transition-all" style={{ width: `${Math.min(100, (macros.netCarbs / (plan.targetNetCarbs || 100)) * 100)}%` }} />
+                            </div>
                           </div>
                         </div>
                         <button
@@ -521,6 +603,26 @@ export default function TodayLog({ user, plan }: { user: any, plan: any }) {
           }}
         />
       )}
+
+      {/* Quick Log Modal */}
+      <AnimatePresence>
+        {quickLogMode && (
+          <QuickLogModal
+            mode={quickLogMode}
+            onClose={() => setQuickLogMode(null)}
+            onSave={async (data) => {
+              // Merge all quick-log fields into today's log
+              for (const [field, value] of Object.entries(data)) {
+                if (value !== undefined) {
+                  await updateLog(selectedDate, field, value);
+                }
+              }
+              toast.success(`${quickLogMode === 'morning' ? 'Morning' : 'Evening'} log saved!`);
+              setQuickLogMode(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

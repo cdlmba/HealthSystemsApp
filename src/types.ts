@@ -35,11 +35,13 @@ export interface DailyLog {
   spiritualRhythm?: boolean; // daily spiritual habits / meditation
   dailyCalls?: number; // relational / client check-ins
   
-  // Other
   dailyProtein?: number;
   hydration?: number; // glasses
   mobility?: boolean; // sit-to-stands or simple mobility drills
   notes?: string;
+
+  // MarginReset/Ghost Dad Fields
+  homeBy515?: boolean; // Fully present at home by 5:15 PM
 
   // Dean Tracker Fields
   caloriesLogged?: number;
@@ -217,6 +219,7 @@ export interface Exercise {
   targetRIR: number;
   lastLoad?: number;
   lastReps?: number;
+  progressionReady?: boolean; // DTT: flag for double progression
   notes?: string;
 }
 

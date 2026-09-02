@@ -504,3 +504,28 @@ html.light {
   padding-left: 1rem;
   padding-right: 1rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+  }
+  .bottom-nav, header, button, .no-print {
+    display: none !important;
+  }
+  .screen-content-wide, .screen-content {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .geometric-card {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+}

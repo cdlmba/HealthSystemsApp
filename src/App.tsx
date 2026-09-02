@@ -4,6 +4,8 @@ import WeeklyReview from './components/WeeklyReview';
 import PlanEditor from './components/PlanEditor';
 import NutritionDashboard from './components/NutritionDashboard';
 import WorkoutLogger from './components/WorkoutLogger';
+import SystemsCoach from './components/SystemsCoach';
+import Onboarding from './components/Onboarding';
 import BottomNav from './components/BottomNav';
 import { Button } from './components/ui/button';
 import { LogOut, LogIn, Moon, Sun } from 'lucide-react';
@@ -24,6 +26,10 @@ export default function App() {
   const { isLightMode, toggleTheme } = useTheme();
   
   const [activeTab, setActiveTab] = useState('today');
+
+  // 3B: Show onboarding if user has no plan configured yet
+  const isOnboarded = !!(plan && (plan as any).userId);
+  const [skipOnboarding, setSkipOnboarding] = useState(false);
 
   if (loading) {
     return (
@@ -90,7 +96,17 @@ export default function App() {
     );
   }
 
-  const isWideScreen = activeTab === 'weekly' || activeTab === 'plan';
+  // 3B: Show onboarding gate for new users
+  if (user && !isOnboarded && !skipOnboarding) {
+    return (
+      <Onboarding
+        user={user}
+        onComplete={() => setSkipOnboarding(true)}
+      />
+    );
+  }
+
+  const isWideScreen = activeTab === 'weekly' || activeTab === 'plan' || activeTab === 'coach';
 
   return (
     <ErrorBoundary>
@@ -143,6 +159,11 @@ export default function App() {
               {activeTab === 'plan' && (
                 <motion.div key="plan" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
                   <PlanEditor user={user} plan={plan as any} />
+                </motion.div>
+              )}
+              {activeTab === 'coach' && (
+                <motion.div key="coach" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.1 }}>
+                  <SystemsCoach user={user} />
                 </motion.div>
               )}
             </AnimatePresence>
